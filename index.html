@@ -1,6 +1,85 @@
-<script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Meal Roulette</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: #0f172a;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .wheel-container {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    canvas {
+      border-radius: 50%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    #spinBtn {
+      background-color: #f59e0b;
+      color: #0f172a;
+      font-weight: bold;
+      font-size: 18px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    #spinBtn:hover {
+      background-color: #d97706;
+    }
+    #spinBtn:disabled {
+      background-color: #64748b;
+      cursor: not-allowed;
+    }
+    #result {
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 15px;
+      min-height: 30px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎰 Meal Roulette</h1>
+  
+  <div class="filters"></div>
+
+  <div class="wheel-container">
+    <canvas id="wheelCanvas" width="400" height="400"></canvas>
+  </div>
+
+  <button id="spinBtn" onclick="spinWheel()">SPIN!</button>
+  <div id="result"></div>
+
+  <script>
     const SHEET_ID = '1U2cY66OYCC7xnrvJ65nCOFcOWyGPkfLYe_-ogoFXaIU';
-    const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+    // Using direct CSV export endpoint to avoid Google API CORS blocks
+    const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
 
     let rawRows = [];
     let headers = [];
@@ -9,48 +88,62 @@
 
     const colors = ["#f59e0b", "#10b981", "#3b82f6", "#ec4899", "#8b5cf6", "#ef4444", "#14b8a6"];
     const canvas = document.getElementById("wheelCanvas");
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas ? canvas.getContext("2d") : null;
     let currentAngle = 0;
     let isSpinning = false;
 
+    // Helper function to safely parse CSV line taking quotes into account
+    function parseCSVLine(text) {
+      const result = [];
+      let cell = '';
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (c === '"') {
+          inQuotes = !inQuotes;
+        } else if (c === ',' && !inQuotes) {
+          result.push(cell.trim());
+          cell = '';
+        } else {
+          cell += c;
+        }
+      }
+      result.push(cell.trim());
+      return result;
+    }
+
     async function loadMealsFromSheet() {
       try {
-        const response = await fetch(SHEET_URL);
-        const text = await response.text();
-        const jsonData = JSON.parse(text.substring(47, text.length - 2));
-        const rows = jsonData.table.rows;
+        const response = await fetch(CSV_URL);
+        if (!response.ok) throw new Error("Failed to fetch Google Sheet CSV");
+        
+        const csvText = await response.text();
+        const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
 
-        if (!rows || rows.length === 0) return;
+        if (lines.length < 2) return;
 
-        // Extract headers directly from the values in Row 1 (Index 0)
-        const headerRow = rows[0];
-        headers = headerRow.c.map((cell, idx) => {
-          return (cell && cell.v !== null && cell.v !== undefined) 
-            ? cell.v.toString().trim() 
-            : `Header ${idx + 1}`;
-        });
+        // Extract column names from Row 1
+        headers = parseCSVLine(lines[0]);
 
-        // Extract data rows (starting from Row 2 / Index 1 onwards)
-        rawRows = rows.slice(1).map(row => {
+        // Extract data rows from Row 2 onwards
+        rawRows = lines.slice(1).map(line => {
+          const values = parseCSVLine(line);
           let item = {};
           headers.forEach((h, idx) => {
-            item[h] = (row.c && row.c[idx] && row.c[idx].v !== null && row.c[idx].v !== undefined) 
-              ? row.c[idx].v.toString().trim() 
-              : '';
+            item[h] = values[idx] || '';
           });
           return item;
-        }).filter(item => {
-          const nameVal = item[headers[0]] ? item[headers[0]].trim() : '';
-          return nameVal !== '';
-        });
+        }).filter(item => item[headers[0]] && item[headers[0]].length > 0);
 
-        // Set default filter state to "All" for each category header
+        // Reset filter states
+        activeFilters = {};
         headers.slice(1).forEach(h => activeFilters[h] = "All");
 
         renderMultiFilters();
         drawWheel();
       } catch (err) {
-        console.error("Error loading Google Sheet:", err);
+        console.error("Error loading spreadsheet data:", err);
+        document.getElementById("result").innerText = "⚠️ Failed to load sheet data. Make sure the sheet is public.";
       }
     }
 
@@ -90,6 +183,7 @@
     }
 
     function drawWheel() {
+      if (!ctx) return;
       activeList = getFilteredMeals();
       const numSlices = activeList.length;
 
@@ -162,6 +256,8 @@
 
     function calculateWinner() {
       const numSlices = activeList.length;
+      if (numSlices === 0) return;
+
       const sliceAngle = (2 * Math.PI) / numSlices;
       let normalizedAngle = (currentAngle + Math.PI / 2) % (2 * Math.PI);
       let winningIndex = numSlices - 1 - Math.floor(normalizedAngle / sliceAngle);
@@ -172,3 +268,5 @@
 
     loadMealsFromSheet();
   </script>
+</body>
+</html>
