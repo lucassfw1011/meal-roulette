@@ -103,6 +103,22 @@
     .wheel-container {
       position: relative;
       margin-bottom: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    /* Indicator Arrow Pointer */
+    .pointer-arrow {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 16px solid transparent;
+      border-right: 16px solid transparent;
+      border-top: 28px solid #f59e0b;
+      z-index: 5;
+      filter: drop-shadow(0px 3px 5px rgba(0,0,0,0.5));
     }
     canvas {
       border-radius: 50%;
@@ -133,6 +149,75 @@
       min-height: 30px;
       text-align: center;
     }
+
+    /* Modal / Pop-Up Styling */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-card {
+      background: #1e293b;
+      border: 1px solid #475569;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 420px;
+      padding: 24px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+      position: relative;
+      text-align: left;
+    }
+    .modal-card h2 {
+      margin-top: 0;
+      color: #f59e0b;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-detail-item {
+      margin: 8px 0;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .modal-detail-item strong {
+      color: #94a3b8;
+    }
+    .modal-section-title {
+      margin-top: 16px;
+      margin-bottom: 6px;
+      font-weight: bold;
+      font-size: 14px;
+      color: #38bdf8;
+      border-top: 1px solid #334155;
+      padding-top: 12px;
+    }
+    .modal-close-btn {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      background: #f59e0b;
+      color: #0f172a;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .modal-close-btn:hover {
+      background: #d97706;
+    }
   </style>
 </head>
 <body>
@@ -142,11 +227,28 @@
   <div class="filters"></div>
 
   <div class="wheel-container">
+    <div class="pointer-arrow"></div>
     <canvas id="wheelCanvas" width="400" height="400"></canvas>
   </div>
 
   <button id="spinBtn" onclick="spinWheel()">SPIN!</button>
   <div id="result"></div>
+
+  <!-- Winner Modal Window -->
+  <div id="winnerModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 id="modalTitle">🎉 Restaurant Name</h2>
+      <div id="modalDetails"></div>
+      
+      <div class="modal-section-title">⭐ Community Rating (Coming Soon)</div>
+      <div style="font-size: 13px; color: #94a3b8;">Ratings and reviews will be available here in a future update!</div>
+
+      <div class="modal-section-title">🍲 Recommended Dishes (Coming Soon)</div>
+      <div style="font-size: 13px; color: #94a3b8;">Add your favorite dishes here to share recommendations.</div>
+
+      <button class="modal-close-btn" onclick="closeModal()">Awesome!</button>
+    </div>
+  </div>
 
   <script>
     const SHEET_ID = '1U2cY66OYCC7xnrvJ65nCOFcOWyGPkfLYe_-ogoFXaIU';
@@ -278,7 +380,6 @@
         `;
       });
 
-      // Add Clear Filters button
       filterHTML += `
         <button class="clear-btn" onclick="clearAllFilters()">Clear Filters</button>
       `;
@@ -395,8 +496,35 @@
       let normalizedAngle = (currentAngle + Math.PI / 2) % (2 * Math.PI);
       let winningIndex = numSlices - 1 - Math.floor(normalizedAngle / sliceAngle);
       winningIndex = (winningIndex + numSlices) % numSlices;
+      
+      const winner = activeList[winningIndex];
       const nameHeader = headers[0];
-      document.getElementById("result").innerText = `🎉 Let's eat: ${activeList[winningIndex][nameHeader]}!`;
+      
+      document.getElementById("result").innerText = `🎉 Let's eat: ${winner[nameHeader]}!`;
+      showWinnerModal(winner);
+    }
+
+    function showWinnerModal(winner) {
+      const nameHeader = headers[0];
+      document.getElementById("modalTitle").innerText = `🎉 ${winner[nameHeader]}`;
+
+      let detailsHTML = "";
+      headers.slice(1).forEach(h => {
+        if (winner[h]) {
+          detailsHTML += `
+            <div class="modal-detail-item">
+              <strong>${h}:</strong> ${winner[h]}
+            </div>
+          `;
+        }
+      });
+
+      document.getElementById("modalDetails").innerHTML = detailsHTML;
+      document.getElementById("winnerModal").classList.add("active");
+    }
+
+    function closeModal() {
+      document.getElementById("winnerModal").classList.remove("active");
     }
 
     loadMealsFromSheet();
