@@ -2,9 +2,11 @@
   const SHEET_ID = '1U2cY66OYCC7xnrvJ65nCOFcOWyGPkfLYe_-ogoFXaIU';
   const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
 
-  let meals = [];
-  let currentFilter = "All";
+  let rawRows = [];
+  let headers = [];
   let activeList = [];
+  let activeFilters = {};
+
   const colors = ["#f59e0b", "#10b981", "#3b82f6", "#ec4899", "#8b5cf6", "#ef4444", "#14b8a6"];
   const canvas = document.getElementById("wheelCanvas");
   const ctx = canvas.getContext("2d");
@@ -15,41 +17,66 @@
     try {
       const response = await fetch(SHEET_URL);
       const text = await response.text();
-      
-      // Parse JSON payload from Google Sheets API
       const jsonData = JSON.parse(text.substring(47, text.length - 2));
+      const cols = jsonData.table.cols;
       const rows = jsonData.table.rows;
 
-      // Map rows and remove header row if present
-      meals = rows
-        .map(row => ({
-          name: row.c[0] ? row.c[0].v.toString().trim() : '',
-          category: row.c[1] ? row.c[1].v.toString().trim() : 'Other'
-        }))
-        .filter(m => m.name !== '' && m.name.toLowerCase() !== 'restaurant');
+      // Extract header names from Column A, Column B, etc.
+      headers = cols.map((col, idx) => col ? (col.label || col.id) : `Col ${idx + 1}`);
 
-      renderFilterButtons();
+      // Parse data rows
+      rawRows = rows.map(row => {
+        let item = {};
+        headers.forEach((h, idx) => {
+          item[h] = (row.c && row.c[idx] && row.c[idx].v !== null) ? row.c[idx].v.toString().trim() : '';
+        });
+        return item;
+      }).filter(item => item[headers[0]] !== '' && item[headers[0]].toLowerCase() !== 'restaurant');
+
+      // Initialize filter selections
+      headers.slice(1).forEach(h => activeFilters[h] = "All");
+
+      renderMultiFilters();
       drawWheel();
     } catch (err) {
       console.error("Error loading Google Sheet:", err);
     }
   }
 
-  function renderFilterButtons() {
+  function renderMultiFilters() {
     const filterContainer = document.querySelector(".filters");
     if (!filterContainer) return;
 
-    // Build unique categories from Column B
-    const categories = ["All", ...new Set(meals.map(m => m.category).filter(Boolean))];
+    // Build dropdown selects for Column B, Column C, etc.
+    let filterHTML = "";
+    headers.slice(1).forEach(header => {
+      const uniqueValues = ["All", ...new Set(rawRows.map(r => r[header]).filter(Boolean))];
+      
+      filterHTML += `
+        <div style="display:inline-block; margin: 5px 10px; text-align: left;">
+          <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 4px; color: #fff;">${header}:</label>
+          <select style="padding: 6px 12px; border-radius: 6px; font-size: 14px; background: #1e293b; color: #fff; border: 1px solid #475569;" onchange="updateFilter('${header}', this.value)">
+            ${uniqueValues.map(val => `<option value="${val}" ${activeFilters[header] === val ? 'selected' : ''}>${val}</option>`).join("")}
+          </select>
+        </div>
+      `;
+    });
 
-    filterContainer.innerHTML = categories.map(cat => 
-      `<button class="chip ${cat === currentFilter ? 'active' : ''}" onclick="filterMeals('${cat}')">${cat}</button>`
-    ).join("");
+    filterContainer.innerHTML = filterHTML;
+  }
+
+  function updateFilter(header, value) {
+    activeFilters[header] = value;
+    drawWheel();
   }
 
   function getFilteredMeals() {
-    if (currentFilter === "All") return meals;
-    return meals.filter(m => m.category === currentFilter);
+    return rawRows.filter(row => {
+      return Object.keys(activeFilters).every(header => {
+        const filterVal = activeFilters[header];
+        return filterVal === "All" || row[header] === filterVal;
+      });
+    });
   }
 
   function drawWheel() {
@@ -66,6 +93,8 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
     ctx.translate(radius, radius);
+
+    const nameHeader = headers[0] || "Restaurant";
 
     activeList.forEach((meal, i) => {
       const startAngle = i * sliceAngle + currentAngle;
@@ -85,7 +114,7 @@
       ctx.textAlign = "right";
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 22px system-ui";
-      ctx.fillText(meal.name, radius - 30, 8);
+      ctx.fillText(meal[nameHeader] || '', radius - 30, 8);
       ctx.restore();
     });
     ctx.restore();
@@ -127,15 +156,9 @@
     let normalizedAngle = (currentAngle + Math.PI / 2) % (2 * Math.PI);
     let winningIndex = numSlices - 1 - Math.floor(normalizedAngle / sliceAngle);
     winningIndex = (winningIndex + numSlices) % numSlices;
-    document.getElementById("result").innerText = `🎉 Let's eat: ${activeList[winningIndex].name}!`;
+    const nameHeader = headers[0] || "Restaurant";
+    document.getElementById("result").innerText = `🎉 Let's eat: ${activeList[winningIndex][nameHeader]}!`;
   }
 
-  function filterMeals(category) {
-    currentFilter = category;
-    renderFilterButtons();
-    drawWheel();
-  }
-
-  // Load dataset from Google Sheet on start
   loadMealsFromSheet();
 </script>
