@@ -127,9 +127,7 @@
 
       let filterHTML = "";
       headers.slice(1).forEach(header => {
-        // Clean header label by taking only the main title before any space
         const cleanHeaderName = header.split(" ")[0].trim();
-
         const uniqueValues = ["All", ...new Set(rawRows.map(r => r[header]).filter(Boolean))];
         
         filterHTML += `
