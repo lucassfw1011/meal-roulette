@@ -1,82 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Meal Roulette</title>
-  <style>
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background-color: #0f172a;
-      color: #ffffff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-    h1 {
-      margin-bottom: 10px;
-    }
-    .filters {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .wheel-container {
-      position: relative;
-      margin-bottom: 20px;
-    }
-    canvas {
-      border-radius: 50%;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    }
-    #spinBtn {
-      background-color: #f59e0b;
-      color: #0f172a;
-      font-weight: bold;
-      font-size: 18px;
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    #spinBtn:hover {
-      background-color: #d97706;
-    }
-    #spinBtn:disabled {
-      background-color: #64748b;
-      cursor: not-allowed;
-    }
-    #result {
-      font-size: 22px;
-      font-weight: bold;
-      margin-top: 15px;
-      min-height: 30px;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-
-  <h1>🎰 Meal Roulette</h1>
-  
-  <div class="filters"></div>
-
-  <div class="wheel-container">
-    <canvas id="wheelCanvas" width="400" height="400"></canvas>
-  </div>
-
-  <button id="spinBtn" onclick="spinWheel()">SPIN!</button>
-  <div id="result"></div>
-
-  <script>
+<script>
     const SHEET_ID = '1U2cY66OYCC7xnrvJ65nCOFcOWyGPkfLYe_-ogoFXaIU';
     const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
 
@@ -96,17 +18,20 @@
         const response = await fetch(SHEET_URL);
         const text = await response.text();
         const jsonData = JSON.parse(text.substring(47, text.length - 2));
-        const cols = jsonData.table.cols;
         const rows = jsonData.table.rows;
 
-        headers = cols.map((col, idx) => {
-          if (col && (col.label || col.id)) {
-            return col.label || col.id;
-          }
-          return `Col${idx + 1}`;
+        if (!rows || rows.length === 0) return;
+
+        // Extract headers directly from the values in Row 1 (Index 0)
+        const headerRow = rows[0];
+        headers = headerRow.c.map((cell, idx) => {
+          return (cell && cell.v !== null && cell.v !== undefined) 
+            ? cell.v.toString().trim() 
+            : `Header ${idx + 1}`;
         });
 
-        rawRows = rows.map(row => {
+        // Extract data rows (starting from Row 2 / Index 1 onwards)
+        rawRows = rows.slice(1).map(row => {
           let item = {};
           headers.forEach((h, idx) => {
             item[h] = (row.c && row.c[idx] && row.c[idx].v !== null && row.c[idx].v !== undefined) 
@@ -115,10 +40,11 @@
           });
           return item;
         }).filter(item => {
-          const nameVal = item[headers[0]] ? item[headers[0]].trim().toLowerCase() : '';
-          return nameVal !== '' && nameVal !== 'restaurant' && nameVal !== 'name';
+          const nameVal = item[headers[0]] ? item[headers[0]].trim() : '';
+          return nameVal !== '';
         });
 
+        // Set default filter state to "All" for each category header
         headers.slice(1).forEach(h => activeFilters[h] = "All");
 
         renderMultiFilters();
@@ -134,12 +60,11 @@
 
       let filterHTML = "";
       headers.slice(1).forEach(header => {
-        const cleanHeaderName = header.split(" ")[0].trim();
         const uniqueValues = ["All", ...new Set(rawRows.map(r => r[header]).filter(Boolean))];
         
         filterHTML += `
           <div style="display:inline-block; margin: 5px 10px; text-align: left;">
-            <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 4px; color: #fff;">${cleanHeaderName}:</label>
+            <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 4px; color: #fff;">${header}:</label>
             <select style="padding: 6px 12px; border-radius: 6px; font-size: 14px; background: #1e293b; color: #fff; border: 1px solid #475569;" onchange="updateFilter('${header}', this.value)">
               ${uniqueValues.map(val => `<option value="${val}" ${activeFilters[header] === val ? 'selected' : ''}>${val}</option>`).join("")}
             </select>
@@ -247,5 +172,3 @@
 
     loadMealsFromSheet();
   </script>
-</body>
-</html>
