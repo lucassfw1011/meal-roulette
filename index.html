@@ -17,23 +17,28 @@
     try {
       const response = await fetch(SHEET_URL);
       const text = await response.text();
+      
+      // Parse JSON from Google Sheets API
       const jsonData = JSON.parse(text.substring(47, text.length - 2));
       const cols = jsonData.table.cols;
       const rows = jsonData.table.rows;
 
-      // Extract header names from Column A, Column B, etc.
-      headers = cols.map((col, idx) => col ? (col.label || col.id) : `Col ${idx + 1}`);
+      // Header row mapping (Row 1)
+      headers = cols.map((col, idx) => col && (col.label || col.id) ? (col.label || col.id) : `Col ${idx + 1}`);
 
-      // Parse data rows
+      // Data row mapping (Row 2 onwards)
       rawRows = rows.map(row => {
         let item = {};
         headers.forEach((h, idx) => {
           item[h] = (row.c && row.c[idx] && row.c[idx].v !== null) ? row.c[idx].v.toString().trim() : '';
         });
         return item;
-      }).filter(item => item[headers[0]] !== '' && item[headers[0]].toLowerCase() !== 'restaurant');
+      }).filter(item => {
+        const firstColVal = item[headers[0]] ? item[headers[0]].toLowerCase() : '';
+        return firstColVal !== '' && firstColVal !== 'restaurant';
+      });
 
-      // Initialize filter selections
+      // Initialize filter states to 'All'
       headers.slice(1).forEach(h => activeFilters[h] = "All");
 
       renderMultiFilters();
@@ -47,7 +52,6 @@
     const filterContainer = document.querySelector(".filters");
     if (!filterContainer) return;
 
-    // Build dropdown selects for Column B, Column C, etc.
     let filterHTML = "";
     headers.slice(1).forEach(header => {
       const uniqueValues = ["All", ...new Set(rawRows.map(r => r[header]).filter(Boolean))];
