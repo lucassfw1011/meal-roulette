@@ -25,6 +25,7 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
+      align-items: flex-end;
       gap: 15px;
       margin-bottom: 20px;
     }
@@ -84,6 +85,21 @@
     .dropdown-item input[type="checkbox"] {
       cursor: pointer;
     }
+    .clear-btn {
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+      background-color: #334155;
+      color: #f1f5f9;
+      border: 1px solid #475569;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+      height: 35px;
+    }
+    .clear-btn:hover {
+      background-color: #ef4444;
+      color: #ffffff;
+    }
     .wheel-container {
       position: relative;
       margin-bottom: 20px;
@@ -139,7 +155,7 @@
     let rawRows = [];
     let headers = [];
     let activeList = [];
-    let selectedFilters = {}; // Stores arrays of selected options per category
+    let selectedFilters = {};
 
     const colors = ["#f59e0b", "#10b981", "#3b82f6", "#ec4899", "#8b5cf6", "#ef4444", "#14b8a6"];
     const canvas = document.getElementById("wheelCanvas");
@@ -187,7 +203,6 @@
           return item;
         }).filter(item => item[headers[0]] && item[headers[0]].length > 0);
 
-        // Initialize selected filters as empty arrays
         headers.slice(1).forEach(h => selectedFilters[h] = []);
 
         renderFilters();
@@ -198,7 +213,6 @@
       }
     }
 
-    // Close dropdowns if clicked outside
     window.onclick = function(event) {
       if (!event.target.matches('.dropdown-btn') && !event.target.closest('.dropdown-content')) {
         document.querySelectorAll('.dropdown-content').forEach(el => el.classList.remove('show'));
@@ -221,11 +235,9 @@
       let filterHTML = "";
 
       headers.slice(1).forEach(header => {
-        // Calculate options valid based on current choices in OTHER filter categories
         const validOptionsForCategory = new Set();
         
         rawRows.forEach(row => {
-          // Check if row satisfies all OTHER active filters
           const matchesOtherFilters = Object.keys(selectedFilters).every(otherHeader => {
             if (otherHeader === header) return true;
             const selected = selectedFilters[otherHeader];
@@ -266,6 +278,11 @@
         `;
       });
 
+      // Add Clear Filters button
+      filterHTML += `
+        <button class="clear-btn" onclick="clearAllFilters()">Clear Filters</button>
+      `;
+
       filterContainer.innerHTML = filterHTML;
     }
 
@@ -277,6 +294,14 @@
         selectedFilters[header].push(val);
       }
       
+      renderFilters();
+      drawWheel();
+    }
+
+    function clearAllFilters() {
+      Object.keys(selectedFilters).forEach(header => {
+        selectedFilters[header] = [];
+      });
       renderFilters();
       drawWheel();
     }
