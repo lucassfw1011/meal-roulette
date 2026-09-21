@@ -18,15 +18,29 @@
       const jsonData = JSON.parse(text.substring(47, text.length - 2));
       const rows = jsonData.table.rows;
 
+      // Read Row 1 as Restaurant (Column A) and Category (Column B)
       meals = rows.map(row => ({
         name: row.c[0] ? row.c[0].v : '',
-        category: row.c[1] ? row.c[1].v : 'Quick'
-      })).filter(m => m.name !== '');
+        category: row.c[1] ? row.c[1].v : 'Other'
+      })).filter(m => m.name !== '' && m.name !== 'Restaurant');
 
+      renderFilterButtons();
       drawWheel();
     } catch (err) {
       console.error("Error loading Google Sheet:", err);
     }
+  }
+
+  function renderFilterButtons() {
+    const filterContainer = document.querySelector(".filters");
+    if (!filterContainer) return;
+
+    // Get unique categories directly from your Google Sheet
+    const categories = ["All", ...new Set(meals.map(m => m.category).filter(Boolean))];
+
+    filterContainer.innerHTML = categories.map(cat => 
+      `<button class="chip ${cat === currentFilter ? 'active' : ''}" onclick="filterMeals('${cat}')">${cat}</button>`
+    ).join("");
   }
 
   function getFilteredMeals() {
@@ -37,10 +51,12 @@
   function drawWheel() {
     activeList = getFilteredMeals();
     const numSlices = activeList.length;
+    
     if (numSlices === 0) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       return;
     }
+
     const sliceAngle = (2 * Math.PI) / numSlices;
     const radius = canvas.width / 2;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -64,7 +80,7 @@
       ctx.rotate(startAngle + sliceAngle / 2);
       ctx.textAlign = "right";
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 24px system-ui";
+      ctx.font = "bold 22px system-ui";
       ctx.fillText(meal.name, radius - 30, 8);
       ctx.restore();
     });
@@ -112,9 +128,7 @@
 
   function filterMeals(category) {
     currentFilter = category;
-    document.querySelectorAll(".chip").forEach(btn => {
-      btn.classList.toggle("active", btn.innerText.includes(category) || (category === "All" && btn.innerText === "All"));
-    });
+    renderFilterButtons();
     drawWheel();
   }
 
