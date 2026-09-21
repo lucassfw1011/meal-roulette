@@ -15,14 +15,18 @@
     try {
       const response = await fetch(SHEET_URL);
       const text = await response.text();
+      
+      // Parse JSON payload from Google Sheets API
       const jsonData = JSON.parse(text.substring(47, text.length - 2));
       const rows = jsonData.table.rows;
 
-      // Read Row 1 as Restaurant (Column A) and Category (Column B)
-      meals = rows.map(row => ({
-        name: row.c[0] ? row.c[0].v : '',
-        category: row.c[1] ? row.c[1].v : 'Other'
-      })).filter(m => m.name !== '' && m.name !== 'Restaurant');
+      // Map rows and remove header row if present
+      meals = rows
+        .map(row => ({
+          name: row.c[0] ? row.c[0].v.toString().trim() : '',
+          category: row.c[1] ? row.c[1].v.toString().trim() : 'Other'
+        }))
+        .filter(m => m.name !== '' && m.name.toLowerCase() !== 'restaurant');
 
       renderFilterButtons();
       drawWheel();
@@ -35,7 +39,7 @@
     const filterContainer = document.querySelector(".filters");
     if (!filterContainer) return;
 
-    // Get unique categories directly from your Google Sheet
+    // Build unique categories from Column B
     const categories = ["All", ...new Set(meals.map(m => m.category).filter(Boolean))];
 
     filterContainer.innerHTML = categories.map(cat => 
@@ -51,7 +55,7 @@
   function drawWheel() {
     activeList = getFilteredMeals();
     const numSlices = activeList.length;
-    
+
     if (numSlices === 0) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       return;
