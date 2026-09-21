@@ -1,174 +1,251 @@
-<script>
-  const SHEET_ID = '1U2cY66OYCC7xnrvJ65nCOFcOWyGPkfLYe_-ogoFXaIU';
-  const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Meal Roulette</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: #0f172a;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .wheel-container {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    canvas {
+      border-radius: 50%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    #spinBtn {
+      background-color: #f59e0b;
+      color: #0f172a;
+      font-weight: bold;
+      font-size: 18px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    #spinBtn:hover {
+      background-color: #d97706;
+    }
+    #spinBtn:disabled {
+      background-color: #64748b;
+      cursor: not-allowed;
+    }
+    #result {
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 15px;
+      min-height: 30px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
 
-  let rawRows = [];
-  let headers = [];
-  let activeList = [];
-  let activeFilters = {};
+  <h1>🎰 Meal Roulette</h1>
+  
+  <div class="filters"></div>
 
-  const colors = ["#f59e0b", "#10b981", "#3b82f6", "#ec4899", "#8b5cf6", "#ef4444", "#14b8a6"];
-  const canvas = document.getElementById("wheelCanvas");
-  const ctx = canvas.getContext("2d");
-  let currentAngle = 0;
-  let isSpinning = false;
+  <div class="wheel-container">
+    <canvas id="wheelCanvas" width="400" height="400"></canvas>
+  </div>
 
-  async function loadMealsFromSheet() {
-    try {
-      const response = await fetch(SHEET_URL);
-      const text = await response.text();
-      const jsonData = JSON.parse(text.substring(47, text.length - 2));
-      const cols = jsonData.table.cols;
-      const rows = jsonData.table.rows;
+  <button id="spinBtn" onclick="spinWheel()">SPIN!</button>
+  <div id="result"></div>
 
-      // Extract raw header names from Row 1
-      headers = cols.map((col, idx) => {
-        if (col && (col.label || col.id)) {
-          return col.label || col.id;
-        }
-        return `Col${idx + 1}`;
-      });
+  <script>
+    const SHEET_ID = '1U2cY66OYCC7xnrvJ65nCOFcOWyGPkfLYe_-ogoFXaIU';
+    const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
 
-      // Map data rows cleanly
-      rawRows = rows.map(row => {
-        let item = {};
-        headers.forEach((h, idx) => {
-          item[h] = (row.c && row.c[idx] && row.c[idx].v !== null && row.c[idx].v !== undefined) 
-            ? row.c[idx].v.toString().trim() 
-            : '';
+    let rawRows = [];
+    let headers = [];
+    let activeList = [];
+    let activeFilters = {};
+
+    const colors = ["#f59e0b", "#10b981", "#3b82f6", "#ec4899", "#8b5cf6", "#ef4444", "#14b8a6"];
+    const canvas = document.getElementById("wheelCanvas");
+    const ctx = canvas.getContext("2d");
+    let currentAngle = 0;
+    let isSpinning = false;
+
+    async function loadMealsFromSheet() {
+      try {
+        const response = await fetch(SHEET_URL);
+        const text = await response.text();
+        const jsonData = JSON.parse(text.substring(47, text.length - 2));
+        const cols = jsonData.table.cols;
+        const rows = jsonData.table.rows;
+
+        headers = cols.map((col, idx) => {
+          if (col && (col.label || col.id)) {
+            return col.label || col.id;
+          }
+          return `Col${idx + 1}`;
         });
-        return item;
-      }).filter(item => {
-        const nameVal = item[headers[0]] ? item[headers[0]].trim().toLowerCase() : '';
-        return nameVal !== '' && nameVal !== 'restaurant' && nameVal !== 'name';
-      });
 
-      // Initialize filter defaults
-      headers.slice(1).forEach(h => activeFilters[h] = "All");
+        rawRows = rows.map(row => {
+          let item = {};
+          headers.forEach((h, idx) => {
+            item[h] = (row.c && row.c[idx] && row.c[idx].v !== null && row.c[idx].v !== undefined) 
+              ? row.c[idx].v.toString().trim() 
+              : '';
+          });
+          return item;
+        }).filter(item => {
+          const nameVal = item[headers[0]] ? item[headers[0]].trim().toLowerCase() : '';
+          return nameVal !== '' && nameVal !== 'restaurant' && nameVal !== 'name';
+        });
 
-      renderMultiFilters();
-      drawWheel();
-    } catch (err) {
-      console.error("Error loading Google Sheet:", err);
-    }
-  }
+        headers.slice(1).forEach(h => activeFilters[h] = "All");
 
-  function renderMultiFilters() {
-    const filterContainer = document.querySelector(".filters");
-    if (!filterContainer) return;
-
-    let filterHTML = "";
-    headers.slice(1).forEach(header => {
-      const cleanHeaderName = header.split(" ")[0].trim();
-      const uniqueValues = ["All", ...new Set(rawRows.map(r => r[header]).filter(Boolean))];
-      
-      filterHTML += `
-        <div style="display:inline-block; margin: 5px 10px; text-align: left;">
-          <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 4px; color: #fff;">${cleanHeaderName}:</label>
-          <select style="padding: 6px 12px; border-radius: 6px; font-size: 14px; background: #1e293b; color: #fff; border: 1px solid #475569;" onchange="updateFilter('${header}', this.value)">
-            ${uniqueValues.map(val => `<option value="${val}" ${activeFilters[header] === val ? 'selected' : ''}>${val}</option>`).join("")}
-          </select>
-        </div>
-      `;
-    });
-
-    filterContainer.innerHTML = filterHTML;
-  }
-
-  function updateFilter(header, value) {
-    activeFilters[header] = value;
-    drawWheel();
-  }
-
-  function getFilteredMeals() {
-    return rawRows.filter(row => {
-      return Object.keys(activeFilters).every(header => {
-        const filterVal = activeFilters[header];
-        return filterVal === "All" || row[header] === filterVal;
-      });
-    });
-  }
-
-  function drawWheel() {
-    activeList = getFilteredMeals();
-    const numSlices = activeList.length;
-
-    if (numSlices === 0) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      return;
-    }
-
-    const sliceAngle = (2 * Math.PI) / numSlices;
-    const radius = canvas.width / 2;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.save();
-    ctx.translate(radius, radius);
-
-    const nameHeader = headers[0];
-
-    activeList.forEach((meal, i) => {
-      const startAngle = i * sliceAngle + currentAngle;
-      const endAngle = startAngle + sliceAngle;
-
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.arc(0, 0, radius, startAngle, endAngle);
-      ctx.fillStyle = colors[i % colors.length];
-      ctx.fill();
-      ctx.lineWidth = 4;
-      ctx.strokeStyle = "#0f172a";
-      ctx.stroke();
-
-      ctx.save();
-      ctx.rotate(startAngle + sliceAngle / 2);
-      ctx.textAlign = "right";
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 18px system-ui";
-      ctx.fillText(meal[nameHeader] || '', radius - 30, 6);
-      ctx.restore();
-    });
-    ctx.restore();
-  }
-
-  function spinWheel() {
-    if (isSpinning || activeList.length === 0) return;
-    isSpinning = true;
-    document.getElementById("spinBtn").disabled = true;
-    document.getElementById("result").innerText = "Spinning...";
-
-    const spinRounds = 5 + Math.random() * 5;
-    const extraAngle = Math.random() * 2 * Math.PI;
-    const totalRotation = spinRounds * 2 * Math.PI + extraAngle;
-    const start = performance.now();
-    const duration = 4000;
-
-    function animate(time) {
-      const elapsed = time - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-      currentAngle = totalRotation * easeOut;
-      drawWheel();
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        isSpinning = false;
-        document.getElementById("spinBtn").disabled = false;
-        calculateWinner();
+        renderMultiFilters();
+        drawWheel();
+      } catch (err) {
+        console.error("Error loading Google Sheet:", err);
       }
     }
-    requestAnimationFrame(animate);
-  }
 
-  function calculateWinner() {
-    const numSlices = activeList.length;
-    const sliceAngle = (2 * Math.PI) / numSlices;
-    let normalizedAngle = (currentAngle + Math.PI / 2) % (2 * Math.PI);
-    let winningIndex = numSlices - 1 - Math.floor(normalizedAngle / sliceAngle);
-    winningIndex = (winningIndex + numSlices) % numSlices;
-    const nameHeader = headers[0];
-    document.getElementById("result").innerText = `🎉 Let's eat: ${activeList[winningIndex][nameHeader]}!`;
-  }
+    function renderMultiFilters() {
+      const filterContainer = document.querySelector(".filters");
+      if (!filterContainer) return;
 
-  loadMealsFromSheet();
-</script>
+      let filterHTML = "";
+      headers.slice(1).forEach(header => {
+        const cleanHeaderName = header.split(" ")[0].trim();
+        const uniqueValues = ["All", ...new Set(rawRows.map(r => r[header]).filter(Boolean))];
+        
+        filterHTML += `
+          <div style="display:inline-block; margin: 5px 10px; text-align: left;">
+            <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 4px; color: #fff;">${cleanHeaderName}:</label>
+            <select style="padding: 6px 12px; border-radius: 6px; font-size: 14px; background: #1e293b; color: #fff; border: 1px solid #475569;" onchange="updateFilter('${header}', this.value)">
+              ${uniqueValues.map(val => `<option value="${val}" ${activeFilters[header] === val ? 'selected' : ''}>${val}</option>`).join("")}
+            </select>
+          </div>
+        `;
+      });
+
+      filterContainer.innerHTML = filterHTML;
+    }
+
+    function updateFilter(header, value) {
+      activeFilters[header] = value;
+      drawWheel();
+    }
+
+    function getFilteredMeals() {
+      return rawRows.filter(row => {
+        return Object.keys(activeFilters).every(header => {
+          const filterVal = activeFilters[header];
+          return filterVal === "All" || row[header] === filterVal;
+        });
+      });
+    }
+
+    function drawWheel() {
+      activeList = getFilteredMeals();
+      const numSlices = activeList.length;
+
+      if (numSlices === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        return;
+      }
+
+      const sliceAngle = (2 * Math.PI) / numSlices;
+      const radius = canvas.width / 2;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.translate(radius, radius);
+
+      const nameHeader = headers[0];
+
+      activeList.forEach((meal, i) => {
+        const startAngle = i * sliceAngle + currentAngle;
+        const endAngle = startAngle + sliceAngle;
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, radius, startAngle, endAngle);
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.fill();
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "#0f172a";
+        ctx.stroke();
+
+        ctx.save();
+        ctx.rotate(startAngle + sliceAngle / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 18px system-ui";
+        ctx.fillText(meal[nameHeader] || '', radius - 30, 6);
+        ctx.restore();
+      });
+      ctx.restore();
+    }
+
+    function spinWheel() {
+      if (isSpinning || activeList.length === 0) return;
+      isSpinning = true;
+      document.getElementById("spinBtn").disabled = true;
+      document.getElementById("result").innerText = "Spinning...";
+
+      const spinRounds = 5 + Math.random() * 5;
+      const extraAngle = Math.random() * 2 * Math.PI;
+      const totalRotation = spinRounds * 2 * Math.PI + extraAngle;
+      const start = performance.now();
+      const duration = 4000;
+
+      function animate(time) {
+        const elapsed = time - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        currentAngle = totalRotation * easeOut;
+        drawWheel();
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          isSpinning = false;
+          document.getElementById("spinBtn").disabled = false;
+          calculateWinner();
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+
+    function calculateWinner() {
+      const numSlices = activeList.length;
+      const sliceAngle = (2 * Math.PI) / numSlices;
+      let normalizedAngle = (currentAngle + Math.PI / 2) % (2 * Math.PI);
+      let winningIndex = numSlices - 1 - Math.floor(normalizedAngle / sliceAngle);
+      winningIndex = (winningIndex + numSlices) % numSlices;
+      const nameHeader = headers[0];
+      document.getElementById("result").innerText = `🎉 Let's eat: ${activeList[winningIndex][nameHeader]}!`;
+    }
+
+    loadMealsFromSheet();
+  </script>
+</body>
+</html>
