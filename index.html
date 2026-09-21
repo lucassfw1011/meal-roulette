@@ -25,8 +25,64 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 10px;
+      gap: 15px;
       margin-bottom: 20px;
+    }
+    .filter-group {
+      position: relative;
+      display: inline-block;
+    }
+    .filter-group label {
+      font-weight: bold;
+      font-size: 14px;
+      display: block;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+    .dropdown-btn {
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+      background: #1e293b;
+      color: #fff;
+      border: 1px solid #475569;
+      cursor: pointer;
+      min-width: 140px;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #1e293b;
+      min-width: 180px;
+      box-shadow: 0px 8px 16px rgba(0,0,0,0.4);
+      border: 1px solid #475569;
+      border-radius: 6px;
+      padding: 8px;
+      z-index: 10;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .dropdown-content.show {
+      display: block;
+    }
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 6px;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .dropdown-item:hover {
+      background-color: #334155;
+    }
+    .dropdown-item input[type="checkbox"] {
+      cursor: pointer;
     }
     .wheel-container {
       position: relative;
@@ -78,13 +134,12 @@
 
   <script>
     const SHEET_ID = '1U2cY66OYCC7xnrvJ65nCOFcOWyGPkfLYe_-ogoFXaIU';
-    // Using direct CSV export endpoint to avoid Google API CORS blocks
     const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
 
     let rawRows = [];
     let headers = [];
     let activeList = [];
-    let activeFilters = {};
+    let selectedFilters = {}; // Stores arrays of selected options per category
 
     const colors = ["#f59e0b", "#10b981", "#3b82f6", "#ec4899", "#8b5cf6", "#ef4444", "#14b8a6"];
     const canvas = document.getElementById("wheelCanvas");
@@ -92,7 +147,6 @@
     let currentAngle = 0;
     let isSpinning = false;
 
-    // Helper function to safely parse CSV line taking quotes into account
     function parseCSVLine(text) {
       const result = [];
       let cell = '';
@@ -122,10 +176,8 @@
 
         if (lines.length < 2) return;
 
-        // Extract column names from Row 1
         headers = parseCSVLine(lines[0]);
 
-        // Extract data rows from Row 2 onwards
         rawRows = lines.slice(1).map(line => {
           const values = parseCSVLine(line);
           let item = {};
@@ -135,32 +187,81 @@
           return item;
         }).filter(item => item[headers[0]] && item[headers[0]].length > 0);
 
-        // Reset filter states
-        activeFilters = {};
-        headers.slice(1).forEach(h => activeFilters[h] = "All");
+        // Initialize selected filters as empty arrays
+        headers.slice(1).forEach(h => selectedFilters[h] = []);
 
-        renderMultiFilters();
+        renderFilters();
         drawWheel();
       } catch (err) {
         console.error("Error loading spreadsheet data:", err);
-        document.getElementById("result").innerText = "⚠️ Failed to load sheet data. Make sure the sheet is public.";
+        document.getElementById("result").innerText = "⚠️ Failed to load sheet data.";
       }
     }
 
-    function renderMultiFilters() {
+    // Close dropdowns if clicked outside
+    window.onclick = function(event) {
+      if (!event.target.matches('.dropdown-btn') && !event.target.closest('.dropdown-content')) {
+        document.querySelectorAll('.dropdown-content').forEach(el => el.classList.remove('show'));
+      }
+    };
+
+    function toggleDropdown(header) {
+      const id = `dropdown-${header.replace(/\s+/g, '-')}`;
+      const dropdown = document.getElementById(id);
+      document.querySelectorAll('.dropdown-content').forEach(el => {
+        if (el !== dropdown) el.classList.remove('show');
+      });
+      if (dropdown) dropdown.classList.toggle('show');
+    }
+
+    function renderFilters() {
       const filterContainer = document.querySelector(".filters");
       if (!filterContainer) return;
 
       let filterHTML = "";
+
       headers.slice(1).forEach(header => {
-        const uniqueValues = ["All", ...new Set(rawRows.map(r => r[header]).filter(Boolean))];
+        // Calculate options valid based on current choices in OTHER filter categories
+        const validOptionsForCategory = new Set();
         
+        rawRows.forEach(row => {
+          // Check if row satisfies all OTHER active filters
+          const matchesOtherFilters = Object.keys(selectedFilters).every(otherHeader => {
+            if (otherHeader === header) return true;
+            const selected = selectedFilters[otherHeader];
+            return selected.length === 0 || selected.includes(row[otherHeader]);
+          });
+
+          if (matchesOtherFilters && row[header]) {
+            validOptionsForCategory.add(row[header]);
+          }
+        });
+
+        const availableOptions = Array.from(validOptionsForCategory).sort();
+        const selected = selectedFilters[header] || [];
+
+        let buttonText = "All";
+        if (selected.length === 1) buttonText = selected[0];
+        else if (selected.length > 1) buttonText = `${selected.length} Selected`;
+
+        const safeHeaderId = header.replace(/\s+/g, '-');
+
         filterHTML += `
-          <div style="display:inline-block; margin: 5px 10px; text-align: left;">
-            <label style="font-weight: bold; font-size: 14px; display: block; margin-bottom: 4px; color: #fff;">${header}:</label>
-            <select style="padding: 6px 12px; border-radius: 6px; font-size: 14px; background: #1e293b; color: #fff; border: 1px solid #475569;" onchange="updateFilter('${header}', this.value)">
-              ${uniqueValues.map(val => `<option value="${val}" ${activeFilters[header] === val ? 'selected' : ''}>${val}</option>`).join("")}
-            </select>
+          <div class="filter-group">
+            <label>${header}:</label>
+            <button class="dropdown-btn" onclick="toggleDropdown('${header}')">
+              <span>${buttonText}</span>
+              <span style="font-size: 10px;">▼</span>
+            </button>
+            <div id="dropdown-${safeHeaderId}" class="dropdown-content">
+              ${availableOptions.map(val => `
+                <label class="dropdown-item">
+                  <input type="checkbox" value="${val}" ${selected.includes(val) ? 'checked' : ''} onchange="toggleOption('${header}', '${val}')">
+                  <span>${val}</span>
+                </label>
+              `).join("")}
+              ${availableOptions.length === 0 ? '<div style="font-size:12px; color:#94a3b8; padding:4px;">No matching options</div>' : ''}
+            </div>
           </div>
         `;
       });
@@ -168,16 +269,23 @@
       filterContainer.innerHTML = filterHTML;
     }
 
-    function updateFilter(header, value) {
-      activeFilters[header] = value;
+    function toggleOption(header, val) {
+      const index = selectedFilters[header].indexOf(val);
+      if (index > -1) {
+        selectedFilters[header].splice(index, 1);
+      } else {
+        selectedFilters[header].push(val);
+      }
+      
+      renderFilters();
       drawWheel();
     }
 
     function getFilteredMeals() {
       return rawRows.filter(row => {
-        return Object.keys(activeFilters).every(header => {
-          const filterVal = activeFilters[header];
-          return filterVal === "All" || row[header] === filterVal;
+        return Object.keys(selectedFilters).every(header => {
+          const selected = selectedFilters[header];
+          return selected.length === 0 || selected.includes(row[header]);
         });
       });
     }
@@ -187,14 +295,14 @@
       activeList = getFilteredMeals();
       const numSlices = activeList.length;
 
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
       if (numSlices === 0) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
         return;
       }
 
       const sliceAngle = (2 * Math.PI) / numSlices;
       const radius = canvas.width / 2;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.save();
       ctx.translate(radius, radius);
 
