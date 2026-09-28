@@ -6,7 +6,7 @@
   <title>Meal Roulette</title>
   <style>
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: #0f172a;
       color: #ffffff;
       display: flex;
@@ -18,11 +18,21 @@
       padding: 20px;
       box-sizing: border-box;
     }
-    h1 {
-      margin-bottom: 20px;
-      font-weight: 700;
-      letter-spacing: -0.025em;
+    h1 { margin-bottom: 20px; font-weight: 700; }
+    .nav-bar { margin-bottom: 20px; }
+    .nav-link {
+      color: #38bdf8;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      border: 1px solid #334155;
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: #1e293b;
+      transition: all 0.2s;
     }
+    .nav-link:hover { background: #334155; color: #fff; }
+
     .filters {
       display: flex;
       flex-wrap: wrap;
@@ -31,10 +41,7 @@
       gap: 12px;
       margin-bottom: 24px;
     }
-    .filter-group {
-      position: relative;
-      display: inline-block;
-    }
+    .filter-group { position: relative; display: inline-block; }
     .filter-group label {
       font-weight: 500;
       font-size: 13px;
@@ -46,19 +53,15 @@
       padding: 8px 12px;
       border-radius: 8px;
       font-size: 13px;
-      font-weight: 400;
       background: #1e293b;
       color: #f8fafc;
       border: 1px solid #334155;
       cursor: pointer;
       min-width: 130px;
-      text-align: left;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      transition: border-color 0.15s ease;
     }
-    .dropdown-btn:hover { border-color: #64748b; }
     .dropdown-content {
       display: none;
       position: absolute;
@@ -80,52 +83,33 @@
       padding: 6px 8px;
       font-size: 13px;
       cursor: pointer;
-      border-radius: 4px;
       color: #e2e8f0;
     }
-    .dropdown-item:hover { background-color: #334155; }
     .clear-btn {
       padding: 8px 14px;
       border-radius: 8px;
       font-size: 13px;
-      font-weight: 500;
       background-color: #1e293b;
       color: #94a3b8;
       border: 1px solid #334155;
       cursor: pointer;
-      transition: all 0.2s ease;
       height: 36px;
     }
-    .clear-btn:hover {
-      background-color: #ef4444;
-      color: #ffffff;
-      border-color: #ef4444;
-    }
-    .wheel-container {
-      position: relative;
-      margin-bottom: 24px;
-      display: flex;
-      justify-content: center;
-    }
+    .clear-btn:hover { background-color: #ef4444; color: #ffffff; }
+
+    .wheel-container { position: relative; margin-bottom: 24px; }
     .pointer-arrow {
       position: absolute;
       top: -10px;
       left: 50%;
       transform: translateX(-50%);
-      width: 0;
-      height: 0;
+      width: 0; height: 0;
       border-left: 14px solid transparent;
       border-right: 14px solid transparent;
       border-top: 24px solid #f59e0b;
       z-index: 5;
-      filter: drop-shadow(0px 3px 6px rgba(0,0,0,0.4));
     }
-    canvas {
-      width: 400px;
-      height: 400px;
-      border-radius: 50%;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-    }
+    canvas { width: 400px; height: 400px; border-radius: 50%; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
     #spinBtn {
       background-color: #f59e0b;
       color: #0f172a;
@@ -135,32 +119,16 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.2s, transform 0.1s;
     }
-    #spinBtn:hover { background-color: #d97706; }
-    #spinBtn:active { transform: scale(0.98); }
-    #spinBtn:disabled {
-      background-color: #475569;
-      color: #94a3b8;
-      cursor: not-allowed;
-    }
-    #result {
-      font-size: 18px;
-      font-weight: 500;
-      margin-top: 16px;
-      min-height: 28px;
-      text-align: center;
-      color: #cbd5e1;
-    }
+    #spinBtn:disabled { background-color: #475569; color: #94a3b8; }
+    #result { font-size: 18px; margin-top: 16px; min-height: 28px; color: #cbd5e1; }
 
-    /* Modal / Pop-Up Styling */
+    /* Modal Styling */
     .modal-overlay {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background: rgba(15, 23, 42, 0.85);
       backdrop-filter: blur(4px);
       z-index: 100;
@@ -172,104 +140,34 @@
       background: #1e293b;
       border: 1px solid #334155;
       border-radius: 12px;
-      width: 90%;
-      max-width: 420px;
+      width: 90%; max-width: 400px;
       padding: 24px;
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-      position: relative;
-      text-align: left;
-      max-height: 85vh;
-      overflow-y: auto;
     }
-    .modal-card h2 {
-      margin-top: 0;
-      color: #f59e0b;
-      font-size: 22px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .modal-detail-item {
-      margin: 8px 0;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-    .modal-detail-item strong {
-      color: #94a3b8;
-      font-weight: 500;
-    }
+    .modal-card h2 { margin-top: 0; color: #f59e0b; font-size: 22px; }
+    .modal-detail-item { margin: 8px 0; font-size: 14px; }
+    .modal-detail-item strong { color: #94a3b8; }
     .modal-section-title {
-      margin-top: 16px;
-      margin-bottom: 8px;
-      font-weight: 600;
-      font-size: 14px;
-      color: #38bdf8;
-      border-top: 1px solid #334155;
-      padding-top: 12px;
+      margin-top: 16px; margin-bottom: 8px;
+      font-weight: 600; font-size: 14px; color: #38bdf8;
+      border-top: 1px solid #334155; padding-top: 12px;
     }
-    
-    /* Interactive Star Rating */
-    .star-rating {
-      display: flex;
-      gap: 6px;
-      font-size: 26px;
-      cursor: pointer;
-      color: #475569;
-    }
-    .star-rating .star.active { color: #f59e0b; }
-
-    /* Form Inputs inside Modal */
-    .review-input {
-      width: 100%;
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 6px;
-      color: #f8fafc;
-      padding: 8px 12px;
-      font-size: 13px;
-      box-sizing: border-box;
-      margin-bottom: 10px;
-    }
-    .review-input:focus {
-      outline: none;
-      border-color: #38bdf8;
-    }
-    .submit-review-btn {
-      width: 100%;
-      padding: 10px;
-      background: #38bdf8;
-      color: #0f172a;
-      font-weight: 600;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      margin-top: 4px;
-      transition: background 0.2s;
-    }
-    .submit-review-btn:hover { background: #0284c7; color: #fff; }
-    .modal-close-btn {
-      margin-top: 16px;
-      width: 100%;
-      padding: 10px;
-      background: #f59e0b;
-      color: #0f172a;
-      font-weight: 600;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 15px;
-    }
-    .modal-close-btn:hover { background: #d97706; }
     .dish-tag {
       display: inline-block;
-      background: #334155;
-      color: #f8fafc;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      margin: 3px 2px;
+      background: #334155; color: #f8fafc;
+      padding: 4px 10px; border-radius: 12px;
+      font-size: 12px; margin: 3px 2px;
+    }
+    .write-review-btn {
+      display: block; width: 100%; text-align: center;
+      box-sizing: border-box; margin-top: 16px;
+      padding: 10px; background: #38bdf8; color: #0f172a;
+      font-weight: 600; text-decoration: none; border-radius: 6px;
+    }
+    .modal-close-btn {
+      margin-top: 10px; width: 100%; padding: 10px;
+      background: #f59e0b; color: #0f172a;
+      font-weight: 600; border: none; border-radius: 6px; cursor: pointer;
     }
   </style>
 </head>
@@ -277,6 +175,10 @@
 
   <h1>🎰 Meal Roulette</h1>
   
+  <div class="nav-bar">
+    <a href="review.html" class="nav-link">✍️ Write a Review / Search Restaurants</a>
+  </div>
+
   <div class="filters"></div>
 
   <div class="wheel-container">
@@ -287,38 +189,19 @@
   <button id="spinBtn" onclick="spinWheel()">SPIN!</button>
   <div id="result"></div>
 
-  <!-- Winner Modal Window -->
+  <!-- Winner Modal -->
   <div id="winnerModal" class="modal-overlay">
     <div class="modal-card">
       <h2 id="modalTitle">🎉 Restaurant Name</h2>
       <div id="modalDetails"></div>
       
-      <!-- Community Rating & Review Section -->
       <div class="modal-section-title">⭐ Community Rating</div>
       <div id="averageRatingText" style="font-size: 13px; color: #94a3b8; margin-bottom: 6px;">Loading ratings...</div>
       
-      <!-- Recommended Dishes Section -->
       <div class="modal-section-title">🍲 Recommended Dishes</div>
-      <div id="recommendedDishesContainer" style="font-size: 13px; color: #cbd5e1; margin-bottom: 8px;">No dishes recommended yet.</div>
+      <div id="recommendedDishesContainer" style="font-size: 13px; color: #cbd5e1;">No dishes recommended yet.</div>
 
-      <!-- Add Review Form -->
-      <div class="modal-section-title">✍️ Add Your Review</div>
-      
-      <div style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">Tap to Rate:</div>
-      <div class="star-rating" id="starRating">
-        <span class="star" data-value="1">★</span>
-        <span class="star" data-value="2">★</span>
-        <span class="star" data-value="3">★</span>
-        <span class="star" data-value="4">★</span>
-        <span class="star" data-value="5">★</span>
-      </div>
-
-      <input type="text" id="dishInput" class="review-input" style="margin-top: 10px;" placeholder="Recommended Dish (e.g. Char Kway Teow, Nasi Lemak)" />
-      <textarea id="reviewInput" class="review-input" rows="2" placeholder="More details/comments (optional)"></textarea>
-      
-      <button class="submit-review-btn" onclick="submitReview()">Submit Review</button>
-      <div id="submitStatus" style="font-size: 12px; margin-top: 6px; text-align: center;"></div>
-
+      <a id="reviewRedirectBtn" href="#" class="write-review-btn">✍️ Write a Review for this Place</a>
       <button class="modal-close-btn" onclick="closeModal()">Awesome!</button>
     </div>
   </div>
@@ -326,97 +209,63 @@
   <script>
     const SHEET_ID = '1U2cY66OYCC7xnrvJ65nCOFcOWyGPkfLYe_-ogoFXaIU';
     const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
-    
-    // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE:
-    const APPS_SCRIPT_URL = 'YOUR_COPIED_WEB_APP_URL_HERE';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQDp75IsVpocDgm-tdLiSTVl_6Shm6vUrgvbvcUCW15yHCUN0BGzK1MHZuKF-n1gCkiw/exec';
 
     let rawRows = [];
     let headers = [];
     let activeList = [];
     let selectedFilters = {};
-    let currentSelectedRestaurant = "";
-    let selectedRating = 0;
     let allReviewsCache = [];
 
-    const colors = [
-      "#FCD34D", "#6EE7B7", "#93C5FD", "#FBCFE8", 
-      "#C4B5FD", "#FCA5A5", "#5EEAD4", "#FDBA74", 
-      "#A5B4FC", "#BEF264", "#F0ABFC", "#7DD3FC"
-    ];
+    const colors = ["#FCD34D", "#6EE7B7", "#93C5FD", "#FBCFE8", "#C4B5FD", "#FCA5A5", "#5EEAD4", "#FDBA74"];
     const canvas = document.getElementById("wheelCanvas");
     const ctx = canvas ? canvas.getContext("2d") : null;
     let currentAngle = 0;
     let isSpinning = false;
 
     function parseCSVLine(text) {
-      const result = [];
-      let cell = '';
-      let inQuotes = false;
+      const result = []; let cell = ''; let inQuotes = false;
       for (let i = 0; i < text.length; i++) {
         const c = text[i];
-        if (c === '"') {
-          inQuotes = !inQuotes;
-        } else if (c === ',' && !inQuotes) {
-          result.push(cell.trim());
-          cell = '';
-        } else {
-          cell += c;
-        }
+        if (c === '"') inQuotes = !inQuotes;
+        else if (c === ',' && !inQuotes) { result.push(cell.trim()); cell = ''; }
+        else cell += c;
       }
-      result.push(cell.trim());
-      return result;
+      result.push(cell.trim()); return result;
     }
 
     function cleanWheelName(name) {
       if (!name) return "";
-      return name
-        .replace(/\b(restaurant|restoran|kitchen|kitchens|kopitiam|cafe|cafe'|café|centre|center|food court|house|bbq|grill|hawker)\b/gi, "")
-        .replace(/\s+/g, " ")
-        .trim();
+      return name.replace(/\b(restaurant|restoran|kitchen|kopitiam|cafe|food court|hawker)\b/gi, "").replace(/\s+/g, " ").trim();
     }
 
     async function loadMealsFromSheet() {
       try {
         const response = await fetch(CSV_URL);
-        if (!response.ok) throw new Error("Failed to fetch Google Sheet CSV");
-        
         const csvText = await response.text();
         const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
-
         if (lines.length < 2) return;
 
         headers = parseCSVLine(lines[0]);
-
         rawRows = lines.slice(1).map(line => {
           const values = parseCSVLine(line);
           let item = {};
-          headers.forEach((h, idx) => {
-            item[h] = values[idx] || '';
-          });
+          headers.forEach((h, idx) => item[h] = values[idx] || '');
           return item;
-        }).filter(item => item[headers[0]] && item[headers[0]].length > 0);
+        }).filter(item => item[headers[0]]);
 
         headers.slice(1).forEach(h => selectedFilters[h] = []);
-
         renderFilters();
         drawWheel();
         loadAllReviews();
-      } catch (err) {
-        console.error("Error loading spreadsheet data:", err);
-        document.getElementById("result").innerText = "⚠️ Failed to load sheet data.";
-      }
+      } catch (err) { console.error("Error loading data:", err); }
     }
 
     async function loadAllReviews() {
-      if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("YOUR_COPIED_WEB_APP_URL_HERE")) return;
       try {
         const res = await fetch(APPS_SCRIPT_URL);
-        if (res.ok) {
-          allReviewsCache = await res.json();
-        }
-      } catch(e) {
-        console.log("Could not fetch existing reviews:", e);
-      }
+        if (res.ok) allReviewsCache = await res.json();
+      } catch(e) {}
     }
 
     window.onclick = function(event) {
@@ -428,180 +277,96 @@
     function toggleDropdown(header) {
       const id = `dropdown-${header.replace(/\s+/g, '-')}`;
       const dropdown = document.getElementById(id);
-      document.querySelectorAll('.dropdown-content').forEach(el => {
-        if (el !== dropdown) el.classList.remove('show');
-      });
+      document.querySelectorAll('.dropdown-content').forEach(el => { if (el !== dropdown) el.classList.remove('show'); });
       if (dropdown) dropdown.classList.toggle('show');
     }
 
     function renderFilters() {
       const filterContainer = document.querySelector(".filters");
       if (!filterContainer) return;
-
       let filterHTML = "";
-
       headers.slice(1).forEach(header => {
-        const validOptionsForCategory = new Set();
-        
+        const validOptions = new Set();
         rawRows.forEach(row => {
-          const matchesOtherFilters = Object.keys(selectedFilters).every(otherHeader => {
-            if (otherHeader === header) return true;
-            const selected = selectedFilters[otherHeader];
-            return selected.length === 0 || selected.includes(row[otherHeader]);
+          const matchesOther = Object.keys(selectedFilters).every(other => {
+            if (other === header) return true;
+            return selectedFilters[other].length === 0 || selectedFilters[other].includes(row[other]);
           });
-
-          if (matchesOtherFilters && row[header]) {
-            validOptionsForCategory.add(row[header]);
-          }
+          if (matchesOther && row[header]) validOptions.add(row[header]);
         });
 
-        const availableOptions = Array.from(validOptionsForCategory).sort();
-        const selected = selectedFilters[header] || [];
-
-        let buttonText = "All";
-        if (selected.length === 1) buttonText = selected[0];
-        else if (selected.length > 1) buttonText = `${selected.length} Selected`;
-
-        const safeHeaderId = header.replace(/\s+/g, '-');
+        const opts = Array.from(validOptions).sort();
+        const sel = selectedFilters[header] || [];
+        let btnText = sel.length === 1 ? sel[0] : (sel.length > 1 ? `${sel.length} Selected` : "All");
 
         filterHTML += `
           <div class="filter-group">
             <label>${header}:</label>
             <button class="dropdown-btn" onclick="toggleDropdown('${header}')">
-              <span>${buttonText}</span>
-              <span style="font-size: 10px; color: #94a3b8;">▼</span>
+              <span>${btnText}</span> <span style="font-size: 10px; color: #94a3b8;">▼</span>
             </button>
-            <div id="dropdown-${safeHeaderId}" class="dropdown-content">
-              ${availableOptions.map(val => `
+            <div id="dropdown-${header.replace(/\s+/g, '-')}" class="dropdown-content">
+              ${opts.map(val => `
                 <label class="dropdown-item">
-                  <input type="checkbox" value="${val}" ${selected.includes(val) ? 'checked' : ''} onchange="toggleOption('${header}', '${val}')">
+                  <input type="checkbox" value="${val}" ${sel.includes(val) ? 'checked' : ''} onchange="toggleOption('${header}', '${val}')">
                   <span>${val}</span>
                 </label>
               `).join("")}
             </div>
-          </div>
-        `;
+          </div>`;
       });
-
       filterHTML += `<button class="clear-btn" onclick="clearAllFilters()">Clear Filters</button>`;
       filterContainer.innerHTML = filterHTML;
     }
 
     function toggleOption(header, val) {
-      const index = selectedFilters[header].indexOf(val);
-      if (index > -1) selectedFilters[header].splice(index, 1);
+      const idx = selectedFilters[header].indexOf(val);
+      if (idx > -1) selectedFilters[header].splice(idx, 1);
       else selectedFilters[header].push(val);
-      
-      renderFilters();
-      drawWheel();
+      renderFilters(); drawWheel();
     }
 
     function clearAllFilters() {
-      Object.keys(selectedFilters).forEach(header => selectedFilters[header] = []);
-      renderFilters();
-      drawWheel();
+      Object.keys(selectedFilters).forEach(h => selectedFilters[h] = []);
+      renderFilters(); drawWheel();
     }
 
     function getFilteredMeals() {
-      return rawRows.filter(row => {
-        return Object.keys(selectedFilters).every(header => {
-          const selected = selectedFilters[header];
-          return selected.length === 0 || selected.includes(row[header]);
-        });
-      });
-    }
-
-    function splitTextToLines(text, maxChars = 24) {
-      if (!text) return [];
-      if (text.includes(' ')) {
-        const words = text.split(' ');
-        let lines = [];
-        let currentLine = words[0] || '';
-        for (let i = 1; i < words.length; i++) {
-          if ((currentLine + ' ' + words[i]).length <= maxChars) {
-            currentLine += ' ' + words[i];
-          } else {
-            lines.push(currentLine);
-            currentLine = words[i];
-          }
-        }
-        lines.push(currentLine);
-        return lines;
-      }
-      let lines = [];
-      for (let i = 0; i < text.length; i += maxChars) {
-        lines.push(text.substring(i, i + maxChars));
-      }
-      return lines;
+      return rawRows.filter(row => Object.keys(selectedFilters).every(h => selectedFilters[h].length === 0 || selectedFilters[h].includes(row[h])));
     }
 
     function drawWheel() {
       if (!ctx) return;
       activeList = getFilteredMeals();
-      const numSlices = activeList.length;
-
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (numSlices === 0) return;
+      if (activeList.length === 0) return;
 
+      const numSlices = activeList.length;
       const sliceAngle = (2 * Math.PI) / numSlices;
       const radius = canvas.width / 2;
-      ctx.save();
-      ctx.translate(radius, radius);
-
-      const nameHeader = headers[0];
-      let fontSize = 15;
-      let maxChars = 26;
-
-      if (numSlices > 35) { fontSize = 10; maxChars = 22; }
-      else if (numSlices > 25) { fontSize = 12; maxChars = 24; }
-      else if (numSlices > 15) { fontSize = 13; maxChars = 25; }
+      ctx.save(); ctx.translate(radius, radius);
 
       activeList.forEach((meal, i) => {
         const startAngle = i * sliceAngle + currentAngle;
         const endAngle = startAngle + sliceAngle;
-
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
+        ctx.beginPath(); ctx.moveTo(0, 0);
         ctx.arc(0, 0, radius, startAngle, endAngle);
-        ctx.fillStyle = colors[i % colors.length];
-        ctx.fill();
-        ctx.lineWidth = 1.5;
-        ctx.strokeStyle = "#0f172a";
-        ctx.stroke();
+        ctx.fillStyle = colors[i % colors.length]; ctx.fill();
+        ctx.lineWidth = 1.5; ctx.strokeStyle = "#0f172a"; ctx.stroke();
 
         ctx.save();
         ctx.rotate(startAngle + sliceAngle / 2);
-        ctx.textAlign = "right";
-        ctx.fillStyle = "#0f172a";
-        ctx.font = `600 ${fontSize}px system-ui, -apple-system, sans-serif`;
-
-        let originalName = meal[nameHeader] || '';
-        let cleanedName = cleanWheelName(originalName) || originalName;
-        let lines = splitTextToLines(cleanedName, maxChars);
-
-        const lineHeight = fontSize + 2;
-        const startY = -((lines.length - 1) * lineHeight) / 2;
-
-        lines.forEach((line, lineIdx) => {
-          ctx.fillText(line, radius - 15, startY + (lineIdx * lineHeight) + (fontSize / 3));
-        });
-
+        ctx.textAlign = "right"; ctx.fillStyle = "#0f172a";
+        ctx.font = `600 13px system-ui`;
+        ctx.fillText(cleanWheelName(meal[headers[0]]), radius - 15, 5);
         ctx.restore();
       });
 
-      ctx.beginPath();
-      ctx.arc(0, 0, 40, 0, 2 * Math.PI);
-      ctx.fillStyle = "#1e293b";
-      ctx.fill();
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = "#f59e0b";
-      ctx.stroke();
-
-      ctx.font = "24px system-ui";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
+      ctx.beginPath(); ctx.arc(0, 0, 40, 0, 2 * Math.PI);
+      ctx.fillStyle = "#1e293b"; ctx.fill();
+      ctx.strokeStyle = "#f59e0b"; ctx.stroke();
+      ctx.font = "24px system-ui"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
       ctx.fillText("🎰", 0, 0);
-
       ctx.restore();
     }
 
@@ -611,179 +376,57 @@
       document.getElementById("spinBtn").disabled = true;
       document.getElementById("result").innerText = "Spinning...";
 
-      const spinRounds = 5 + Math.random() * 5;
-      const extraAngle = Math.random() * 2 * Math.PI;
-      const totalRotation = spinRounds * 2 * Math.PI + extraAngle;
+      const totalRotation = (5 + Math.random() * 5) * 2 * Math.PI + Math.random() * 2 * Math.PI;
       const start = performance.now();
-      const duration = 4000;
-
       function animate(time) {
         const elapsed = time - start;
-        const progress = Math.min(elapsed / duration, 1);
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        currentAngle = totalRotation * easeOut;
+        const progress = Math.min(elapsed / 4000, 1);
+        currentAngle = totalRotation * (1 - Math.pow(1 - progress, 3));
         drawWheel();
-
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          isSpinning = false;
-          document.getElementById("spinBtn").disabled = false;
-          calculateWinner();
-        }
+        if (progress < 1) requestAnimationFrame(animate);
+        else { isSpinning = false; document.getElementById("spinBtn").disabled = false; calculateWinner(); }
       }
       requestAnimationFrame(animate);
     }
 
     function calculateWinner() {
       const numSlices = activeList.length;
-      if (numSlices === 0) return;
-
-      const sliceAngle = (2 * Math.PI) / numSlices;
       let normalizedAngle = (currentAngle + Math.PI / 2) % (2 * Math.PI);
-      let winningIndex = numSlices - 1 - Math.floor(normalizedAngle / sliceAngle);
-      winningIndex = (winningIndex + numSlices) % numSlices;
-      
+      let winningIndex = (numSlices - 1 - Math.floor(normalizedAngle / ((2 * Math.PI) / numSlices)) + numSlices) % numSlices;
       const winner = activeList[winningIndex];
-      const nameHeader = headers[0];
-      
-      document.getElementById("result").innerText = `🎉 Let's eat: ${winner[nameHeader]}!`;
+      document.getElementById("result").innerText = `🎉 Let's eat: ${winner[headers[0]]}!`;
       showWinnerModal(winner);
     }
 
     function showWinnerModal(winner) {
-      const nameHeader = headers[0];
-      currentSelectedRestaurant = winner[nameHeader];
-      document.getElementById("modalTitle").innerText = `🎉 ${currentSelectedRestaurant}`;
+      const restaurantName = winner[headers[0]];
+      document.getElementById("modalTitle").innerText = `🎉 ${restaurantName}`;
 
       let detailsHTML = "";
       headers.slice(1).forEach(h => {
-        if (winner[h]) {
-          detailsHTML += `
-            <div class="modal-detail-item">
-              <strong>${h}:</strong> ${winner[h]}
-            </div>
-          `;
-        }
+        if (winner[h]) detailsHTML += `<div class="modal-detail-item"><strong>${h}:</strong> ${winner[h]}</div>`;
       });
-
       document.getElementById("modalDetails").innerHTML = detailsHTML;
-      
-      // Reset Form State
-      setRating(0);
-      document.getElementById("dishInput").value = "";
-      document.getElementById("reviewInput").value = "";
-      document.getElementById("submitStatus").innerText = "";
 
-      // Load Reviews UI
-      updateModalReviewsUI(currentSelectedRestaurant);
+      // Link to review page with pre-selected restaurant parameter
+      document.getElementById("reviewRedirectBtn").href = `review.html?restaurant=${encodeURIComponent(restaurantName)}`;
+
+      // Load Reviews
+      const matches = allReviewsCache.filter(r => r.Restaurant === restaurantName);
+      const ratings = matches.map(r => Number(r.Rating)).filter(n => n > 0);
+      document.getElementById("averageRatingText").innerText = ratings.length > 0 
+        ? `⭐ ${(ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)} / 5.0 (${ratings.length} reviews)`
+        : "No ratings submitted yet. Be the first!";
+
+      const dishesRaw = matches.map(r => r.RecommendedDishes).filter(Boolean);
+      document.getElementById("recommendedDishesContainer").innerHTML = dishesRaw.length > 0 
+        ? dishesRaw.flatMap(d => d.split(',')).map(d => `<span class="dish-tag">🍲 ${d.trim()}</span>`).join("")
+        : "No dishes recommended yet.";
 
       document.getElementById("winnerModal").classList.add("active");
     }
 
-    function updateModalReviewsUI(restaurantName) {
-      const matches = allReviewsCache.filter(r => r.Restaurant === restaurantName);
-      
-      // Calculate Average Rating
-      const ratings = matches.map(r => Number(r.Rating)).filter(n => n > 0);
-      if (ratings.length > 0) {
-        const avg = (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1);
-        document.getElementById("averageRatingText").innerText = `⭐ ${avg} / 5.0 (${ratings.length} reviews)`;
-      } else {
-        document.getElementById("averageRatingText").innerText = "No ratings submitted yet. Be the first!";
-      }
-
-      // Display Recommended Dishes
-      const dishesRaw = matches.map(r => r.RecommendedDishes).filter(d => d && d.trim() !== "");
-      const dishesContainer = document.getElementById("recommendedDishesContainer");
-      
-      if (dishesRaw.length > 0) {
-        let allDishes = [];
-        dishesRaw.forEach(d => {
-          const split = d.split(',').map(item => item.trim()).filter(Boolean);
-          allDishes.push(...split);
-        });
-        
-        dishesContainer.innerHTML = allDishes.map(d => `<span class="dish-tag">🍲 ${d}</span>`).join("");
-      } else {
-        dishesContainer.innerText = "No dishes recommended yet.";
-      }
-    }
-
-    // Interactive Star Rating Logic
-    document.querySelectorAll('.star-rating .star').forEach(star => {
-      star.addEventListener('click', function() {
-        setRating(parseInt(this.getAttribute('data-value')));
-      });
-    });
-
-    function setRating(val) {
-      selectedRating = val;
-      document.querySelectorAll('.star-rating .star').forEach(star => {
-        const v = parseInt(star.getAttribute('data-value'));
-        if (v <= val) star.classList.add('active');
-        else star.classList.remove('active');
-      });
-    }
-
-    async function submitReview() {
-      if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("YOUR_COPIED_WEB_APP_URL_HERE")) {
-        alert("Please paste your Google Apps Script Web App URL into line 235 of the code!");
-        return;
-      }
-
-      const dish = document.getElementById("dishInput").value.trim();
-      const review = document.getElementById("reviewInput").value.trim();
-      const status = document.getElementById("submitStatus");
-
-      if (selectedRating === 0 && !dish && !review) {
-        status.style.color = "#f87171";
-        status.innerText = "Please provide a star rating or dish recommendation!";
-        return;
-      }
-
-      status.style.color = "#38bdf8";
-      status.innerText = "Submitting review...";
-
-      const payload = {
-        restaurant: currentSelectedRestaurant,
-        rating: selectedRating,
-        dishes: dish,
-        review: review
-      };
-
-      try {
-        await fetch(APPS_SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        status.style.color = "#4ade80";
-        status.innerText = "✅ Thank you! Review saved.";
-        
-        // Optimistically update local cache
-        allReviewsCache.push({
-          Restaurant: currentSelectedRestaurant,
-          Rating: selectedRating,
-          RecommendedDishes: dish,
-          ReviewText: review
-        });
-
-        setTimeout(() => {
-          updateModalReviewsUI(currentSelectedRestaurant);
-        }, 600);
-
-      } catch (err) {
-        status.style.color = "#f87171";
-        status.innerText = "Failed to submit. Please try again.";
-      }
-    }
-
-    function closeModal() {
-      document.getElementById("winnerModal").classList.remove("active");
-    }
+    function closeModal() { document.getElementById("winnerModal").classList.remove("active"); }
 
     loadMealsFromSheet();
   </script>
