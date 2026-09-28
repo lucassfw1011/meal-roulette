@@ -27,7 +27,6 @@
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
     
-    /* Back Button Style */
     .back-btn {
       display: inline-block;
       color: #f8fafc;
@@ -135,7 +134,12 @@
 
   <script>
     const SHEET_ID = '1U2cY66OYCC7xnrvJ65nCOFcOWyGPkfLYe_-ogoFXaIU';
-    const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+    const RESTAURANTS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+    
+    // Reviews CSV endpoint using your exact GID
+    const REVIEWS_TAB_GID = '324231370';
+    const REVIEWS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${REVIEWS_TAB_GID}`;
+
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQDp75IsVpocDgm-tdLiSTVl_6Shm6vUrgvbvcUCW15yHCUN0BGzK1MHZuKF-n1gCkiw/exec';
 
     let selectedRating = 0;
@@ -155,7 +159,7 @@
     async function initPage() {
       // 1. Fetch Restaurants
       try {
-        const response = await fetch(CSV_URL);
+        const response = await fetch(RESTAURANTS_CSV_URL);
         const csvText = await response.text();
         const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
         if (lines.length > 1) {
@@ -173,14 +177,22 @@
         }
       } catch(e) { console.error("Error loading restaurants", e); }
 
-      // 2. Fetch Existing Reviews
+      // 2. Fetch Existing Reviews directly from Google Sheet CSV
       try {
-        const res = await fetch(APPS_SCRIPT_URL);
-        if (res.ok) {
-          allReviewsCache = await res.json();
+        const res = await fetch(REVIEWS_CSV_URL);
+        const text = await res.text();
+        const lines = text.split(/\r?\n/).filter(l => l.trim());
+        if (lines.length > 1) {
+          const revHeaders = parseCSVLine(lines[0]);
+          allReviewsCache = lines.slice(1).map(l => {
+            const cells = parseCSVLine(l);
+            const obj = {};
+            revHeaders.forEach((h, i) => { obj[h] = cells[i] || ''; });
+            return obj;
+          });
           onRestaurantChanged();
         }
-      } catch(e) {}
+      } catch(e) { console.error("Error loading reviews", e); }
     }
 
     // Star Click Handling
@@ -201,19 +213,25 @@
         return;
       }
 
-      const matches = allReviewsCache.filter(r => r.Restaurant.toLowerCase() === selected.toLowerCase());
+      const matches = allReviewsCache.filter(r => (r.Restaurant || '').toLowerCase() === selected.toLowerCase());
       if (matches.length === 0) {
         reviewsList.innerHTML = "No reviews yet for this restaurant. Be the first!";
         return;
       }
 
-      reviewsList.innerHTML = matches.map(r => `
-        <div class="review-item">
-          <div class="review-stars">${'★'.repeat(r.Rating || 0)}${'☆'.repeat(5 - (r.Rating || 0))}</div>
-          ${r.RecommendedDishes ? `<div><span class="dish-tag">🍲 ${r.RecommendedDishes}</span></div>` : ''}
-          ${r.ReviewText ? `<div style="margin-top: 6px; color: #cbd5e1;">"${r.ReviewText}"</div>` : ''}
-        </div>
-      `).join("");
+      reviewsList.innerHTML = matches.map(r => {
+        const rating = parseInt(r.Rating) || 0;
+        const dish = r.RecommendedDish || r.RecommendedDishes || '';
+        const reviewText = r.Review || r.ReviewText || '';
+
+        return `
+          <div class="review-item">
+            <div class="review-stars">${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}</div>
+            ${dish ? `<div><span class="dish-tag">🍲 ${dish}</span></div>` : ''}
+            ${reviewText ? `<div style="margin-top: 6px; color: #cbd5e1;">"${reviewText}"</div>` : ''}
+          </div>
+        `;
+      }).join("");
     }
 
     async function submitReview() {
@@ -250,7 +268,12 @@
         status.innerText = "✅ Thank you! Review submitted successfully.";
 
         // Cache update
-        allReviewsCache.push({ Restaurant: restaurant, Rating: selectedRating, RecommendedDishes: dish, ReviewText: review });
+        allReviewsCache.push({ 
+          Restaurant: restaurant, 
+          Rating: selectedRating, 
+          RecommendedDish: dish, 
+          Review: review 
+        });
         onRestaurantChanged();
 
         // Reset Inputs
