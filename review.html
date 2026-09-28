@@ -268,22 +268,20 @@
       status.style.color = "#38bdf8";
       status.innerText = "Submitting review...";
 
-      // Format payload as URL Search Params to bypass CORS preflight issues smoothly
-      const payload = new URLSearchParams({
+      // Encode params directly into URL string (bypasses browser CORS blocks entirely)
+      const queryParams = new URLSearchParams({
         restaurant: restaurant,
         rating: selectedRating,
         dishes: dish,
         review: review
-      });
+      }).toString();
+
+      const finalUrl = `${APPS_SCRIPT_URL}?${queryParams}`;
 
       try {
-        await fetch(APPS_SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-          },
-          body: payload.toString()
+        await fetch(finalUrl, {
+          method: "GET",
+          mode: "no-cors"
         });
 
         status.style.color = "#4ade80";
