@@ -26,19 +26,31 @@
       padding: 24px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
-    .back-link {
-      color: #94a3b8;
+    
+    /* Back Button Style */
+    .back-btn {
+      display: inline-block;
+      color: #f8fafc;
+      background-color: #334155;
       text-decoration: none;
       font-size: 13px;
-      display: inline-block;
-      margin-bottom: 16px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: 1px solid #475569;
+      margin-bottom: 20px;
+      transition: all 0.2s ease;
     }
-    .back-link:hover { color: #f59e0b; }
+    .back-btn:hover {
+      background-color: #475569;
+      border-color: #64748b;
+    }
+
     h1 { font-size: 20px; margin-top: 0; color: #f59e0b; }
     
     label { font-size: 13px; color: #94a3b8; display: block; margin-top: 14px; margin-bottom: 6px; }
     
-    select, input, textarea {
+    input, textarea {
       width: 100%;
       background: #0f172a;
       border: 1px solid #334155;
@@ -48,7 +60,7 @@
       font-size: 14px;
       box-sizing: border-box;
     }
-    select:focus, input:focus, textarea:focus { outline: none; border-color: #38bdf8; }
+    input:focus, textarea:focus { outline: none; border-color: #38bdf8; }
 
     .star-rating {
       display: flex; gap: 8px; font-size: 30px; cursor: pointer; color: #475569; margin-top: 4px;
@@ -79,14 +91,19 @@
 <body>
 
   <div class="container">
-    <a href="index.html" class="back-link">← Back to Meal Roulette</a>
+    <a href="index.html" class="back-btn">← Back to Meal Roulette</a>
     <h1>✍️ Write a Restaurant Review</h1>
 
-    <!-- Restaurant Selector / Search -->
-    <label for="restaurantSelect">Select Restaurant:</label>
-    <select id="restaurantSelect" onchange="onRestaurantChanged()">
-      <option value="">-- Loading restaurants... --</option>
-    </select>
+    <!-- Searchable Restaurant Input -->
+    <label for="restaurantInput">Type or Select a Restaurant:</label>
+    <input 
+      list="restaurantOptions" 
+      id="restaurantInput" 
+      placeholder="Type restaurant name or choose..." 
+      oninput="onRestaurantChanged()"
+      autocomplete="off"
+    />
+    <datalist id="restaurantOptions"></datalist>
 
     <!-- Rating -->
     <label>Rating (1 - 5 Stars):</label>
@@ -142,18 +159,16 @@
         const csvText = await response.text();
         const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
         if (lines.length > 1) {
-          const headers = parseCSVLine(lines[0]);
           const restaurantList = lines.slice(1).map(l => parseCSVLine(l)[0]).filter(Boolean).sort();
           
-          const select = document.getElementById("restaurantSelect");
-          select.innerHTML = '<option value="">-- Select a Restaurant --</option>' + 
-            restaurantList.map(r => `<option value="${r}">${r}</option>`).join("");
+          const datalist = document.getElementById("restaurantOptions");
+          datalist.innerHTML = restaurantList.map(r => `<option value="${r}">`).join("");
 
           // Check URL query parameters (if redirected from roulette modal)
           const urlParams = new URLSearchParams(window.location.search);
           const preSelected = urlParams.get('restaurant');
           if (preSelected) {
-            select.value = preSelected;
+            document.getElementById("restaurantInput").value = preSelected;
           }
         }
       } catch(e) { console.error("Error loading restaurants", e); }
@@ -179,14 +194,14 @@
     });
 
     function onRestaurantChanged() {
-      const selected = document.getElementById("restaurantSelect").value;
+      const selected = document.getElementById("restaurantInput").value.trim();
       const reviewsList = document.getElementById("reviewsList");
       if (!selected) {
-        reviewsList.innerHTML = "Select a restaurant to see reviews.";
+        reviewsList.innerHTML = "Select or type a restaurant name to see existing reviews.";
         return;
       }
 
-      const matches = allReviewsCache.filter(r => r.Restaurant === selected);
+      const matches = allReviewsCache.filter(r => r.Restaurant.toLowerCase() === selected.toLowerCase());
       if (matches.length === 0) {
         reviewsList.innerHTML = "No reviews yet for this restaurant. Be the first!";
         return;
@@ -202,14 +217,14 @@
     }
 
     async function submitReview() {
-      const restaurant = document.getElementById("restaurantSelect").value;
+      const restaurant = document.getElementById("restaurantInput").value.trim();
       const dish = document.getElementById("dishInput").value.trim();
       const review = document.getElementById("reviewInput").value.trim();
       const status = document.getElementById("status");
 
       if (!restaurant) {
         status.style.color = "#f87171";
-        status.innerText = "Please select a restaurant!";
+        status.innerText = "Please select or type a restaurant name!";
         return;
       }
       if (selectedRating === 0 && !dish && !review) {
