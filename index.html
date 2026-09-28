@@ -381,8 +381,24 @@
         ctx.translate(centerX, centerY);
         ctx.rotate(angle + sliceAngle / 2);
         ctx.textAlign = "right"; ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 12px sans-serif";
-        ctx.fillText(r.Restaurant || "", radius - 15, 4);
+        
+        // Dynamic Font Scaling based on number of items and text length
+        const text = r.Restaurant || "";
+        const maxRadiusWidth = radius - 35; // keep inside slice margin
+        
+        // Estimate max allowed height for slice
+        const maxSliceThickness = radius * Math.sin(sliceAngle / 2) * 1.5;
+        
+        let fontSize = Math.min(14, Math.max(8, Math.floor(maxSliceThickness)));
+        ctx.font = `bold ${fontSize}px sans-serif`;
+
+        // Scale down if string exceeds wedge radius
+        while (ctx.measureText(text).width > maxRadiusWidth && fontSize > 8) {
+          fontSize--;
+          ctx.font = `bold ${fontSize}px sans-serif`;
+        }
+
+        ctx.fillText(text, radius - 15, fontSize / 3);
         ctx.restore();
       });
 
@@ -507,7 +523,7 @@
             <span style="font-size:10px; color:#64748b;">${r.Timestamp || ''}</span>
           </div>
           ${r.RecommendedDish || r.RecommendedDishes ? `<div style="color:#38bdf8; font-size:11px; margin-top:2px;">👍 ${r.RecommendedDish || r.RecommendedDishes}</div>` : ''}
-          ${r.Review ? `<div style="color:#cbd5e1; margin-top:4px;">"${r.Review}"</div>` : ''}
+          ${r.ReviewText || r.Review ? `<div style="color:#cbd5e1; margin-top:4px;">"${r.ReviewText || r.Review}"</div>` : ''}
         </div>
       `).join("");
     }
