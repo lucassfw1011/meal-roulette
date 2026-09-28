@@ -58,9 +58,7 @@
       align-items: center;
       transition: border-color 0.15s ease;
     }
-    .dropdown-btn:hover {
-      border-color: #64748b;
-    }
+    .dropdown-btn:hover { border-color: #64748b; }
     .dropdown-content {
       display: none;
       position: absolute;
@@ -74,9 +72,7 @@
       max-height: 200px;
       overflow-y: auto;
     }
-    .dropdown-content.show {
-      display: block;
-    }
+    .dropdown-content.show { display: block; }
     .dropdown-item {
       display: flex;
       align-items: center;
@@ -87,12 +83,7 @@
       border-radius: 4px;
       color: #e2e8f0;
     }
-    .dropdown-item:hover {
-      background-color: #334155;
-    }
-    .dropdown-item input[type="checkbox"] {
-      cursor: pointer;
-    }
+    .dropdown-item:hover { background-color: #334155; }
     .clear-btn {
       padding: 8px 14px;
       border-radius: 8px;
@@ -146,12 +137,8 @@
       cursor: pointer;
       transition: background-color 0.2s, transform 0.1s;
     }
-    #spinBtn:hover {
-      background-color: #d97706;
-    }
-    #spinBtn:active {
-      transform: scale(0.98);
-    }
+    #spinBtn:hover { background-color: #d97706; }
+    #spinBtn:active { transform: scale(0.98); }
     #spinBtn:disabled {
       background-color: #475569;
       color: #94a3b8;
@@ -180,19 +167,19 @@
       justify-content: center;
       align-items: center;
     }
-    .modal-overlay.active {
-      display: flex;
-    }
+    .modal-overlay.active { display: flex; }
     .modal-card {
       background: #1e293b;
       border: 1px solid #334155;
       border-radius: 12px;
       width: 90%;
-      max-width: 400px;
+      max-width: 420px;
       padding: 24px;
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
       position: relative;
       text-align: left;
+      max-height: 85vh;
+      overflow-y: auto;
     }
     .modal-card h2 {
       margin-top: 0;
@@ -214,15 +201,56 @@
     }
     .modal-section-title {
       margin-top: 16px;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       font-weight: 600;
-      font-size: 13px;
+      font-size: 14px;
       color: #38bdf8;
       border-top: 1px solid #334155;
       padding-top: 12px;
     }
+    
+    /* Interactive Star Rating */
+    .star-rating {
+      display: flex;
+      gap: 6px;
+      font-size: 26px;
+      cursor: pointer;
+      color: #475569;
+    }
+    .star-rating .star.active { color: #f59e0b; }
+
+    /* Form Inputs inside Modal */
+    .review-input {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: #f8fafc;
+      padding: 8px 12px;
+      font-size: 13px;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+    }
+    .review-input:focus {
+      outline: none;
+      border-color: #38bdf8;
+    }
+    .submit-review-btn {
+      width: 100%;
+      padding: 10px;
+      background: #38bdf8;
+      color: #0f172a;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 4px;
+      transition: background 0.2s;
+    }
+    .submit-review-btn:hover { background: #0284c7; color: #fff; }
     .modal-close-btn {
-      margin-top: 20px;
+      margin-top: 16px;
       width: 100%;
       padding: 10px;
       background: #f59e0b;
@@ -233,8 +261,15 @@
       cursor: pointer;
       font-size: 15px;
     }
-    .modal-close-btn:hover {
-      background: #d97706;
+    .modal-close-btn:hover { background: #d97706; }
+    .dish-tag {
+      display: inline-block;
+      background: #334155;
+      color: #f8fafc;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      margin: 3px 2px;
     }
   </style>
 </head>
@@ -258,11 +293,31 @@
       <h2 id="modalTitle">🎉 Restaurant Name</h2>
       <div id="modalDetails"></div>
       
-      <div class="modal-section-title">⭐ Community Rating (Coming Soon)</div>
-      <div style="font-size: 13px; color: #94a3b8;">Ratings and reviews will be available here in a future update!</div>
+      <!-- Community Rating & Review Section -->
+      <div class="modal-section-title">⭐ Community Rating</div>
+      <div id="averageRatingText" style="font-size: 13px; color: #94a3b8; margin-bottom: 6px;">Loading ratings...</div>
+      
+      <!-- Recommended Dishes Section -->
+      <div class="modal-section-title">🍲 Recommended Dishes</div>
+      <div id="recommendedDishesContainer" style="font-size: 13px; color: #cbd5e1; margin-bottom: 8px;">No dishes recommended yet.</div>
 
-      <div class="modal-section-title">🍲 Recommended Dishes (Coming Soon)</div>
-      <div style="font-size: 13px; color: #94a3b8;">Add your favorite dishes here to share recommendations.</div>
+      <!-- Add Review Form -->
+      <div class="modal-section-title">✍️ Add Your Review</div>
+      
+      <div style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">Tap to Rate:</div>
+      <div class="star-rating" id="starRating">
+        <span class="star" data-value="1">★</span>
+        <span class="star" data-value="2">★</span>
+        <span class="star" data-value="3">★</span>
+        <span class="star" data-value="4">★</span>
+        <span class="star" data-value="5">★</span>
+      </div>
+
+      <input type="text" id="dishInput" class="review-input" style="margin-top: 10px;" placeholder="Recommended Dish (e.g. Char Kway Teow, Nasi Lemak)" />
+      <textarea id="reviewInput" class="review-input" rows="2" placeholder="More details/comments (optional)"></textarea>
+      
+      <button class="submit-review-btn" onclick="submitReview()">Submit Review</button>
+      <div id="submitStatus" style="font-size: 12px; margin-top: 6px; text-align: center;"></div>
 
       <button class="modal-close-btn" onclick="closeModal()">Awesome!</button>
     </div>
@@ -271,11 +326,17 @@
   <script>
     const SHEET_ID = '1U2cY66OYCC7xnrvJ65nCOFcOWyGPkfLYe_-ogoFXaIU';
     const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+    
+    // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE:
+    const APPS_SCRIPT_URL = 'YOUR_COPIED_WEB_APP_URL_HERE';
 
     let rawRows = [];
     let headers = [];
     let activeList = [];
     let selectedFilters = {};
+    let currentSelectedRestaurant = "";
+    let selectedRating = 0;
+    let allReviewsCache = [];
 
     const colors = [
       "#FCD34D", "#6EE7B7", "#93C5FD", "#FBCFE8", 
@@ -306,7 +367,6 @@
       return result;
     }
 
-    // Strips common filler words for cleaner wheel rendering
     function cleanWheelName(name) {
       if (!name) return "";
       return name
@@ -340,9 +400,22 @@
 
         renderFilters();
         drawWheel();
+        loadAllReviews();
       } catch (err) {
         console.error("Error loading spreadsheet data:", err);
         document.getElementById("result").innerText = "⚠️ Failed to load sheet data.";
+      }
+    }
+
+    async function loadAllReviews() {
+      if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("YOUR_COPIED_WEB_APP_URL_HERE")) return;
+      try {
+        const res = await fetch(APPS_SCRIPT_URL);
+        if (res.ok) {
+          allReviewsCache = await res.json();
+        }
+      } catch(e) {
+        console.log("Could not fetch existing reviews:", e);
       }
     }
 
@@ -405,35 +478,26 @@
                   <span>${val}</span>
                 </label>
               `).join("")}
-              ${availableOptions.length === 0 ? '<div style="font-size:12px; color:#94a3b8; padding:4px;">No matching options</div>' : ''}
             </div>
           </div>
         `;
       });
 
-      filterHTML += `
-        <button class="clear-btn" onclick="clearAllFilters()">Clear Filters</button>
-      `;
-
+      filterHTML += `<button class="clear-btn" onclick="clearAllFilters()">Clear Filters</button>`;
       filterContainer.innerHTML = filterHTML;
     }
 
     function toggleOption(header, val) {
       const index = selectedFilters[header].indexOf(val);
-      if (index > -1) {
-        selectedFilters[header].splice(index, 1);
-      } else {
-        selectedFilters[header].push(val);
-      }
+      if (index > -1) selectedFilters[header].splice(index, 1);
+      else selectedFilters[header].push(val);
       
       renderFilters();
       drawWheel();
     }
 
     function clearAllFilters() {
-      Object.keys(selectedFilters).forEach(header => {
-        selectedFilters[header] = [];
-      });
+      Object.keys(selectedFilters).forEach(header => selectedFilters[header] = []);
       renderFilters();
       drawWheel();
     }
@@ -449,7 +513,6 @@
 
     function splitTextToLines(text, maxChars = 24) {
       if (!text) return [];
-      
       if (text.includes(' ')) {
         const words = text.split(' ');
         let lines = [];
@@ -465,7 +528,6 @@
         lines.push(currentLine);
         return lines;
       }
-
       let lines = [];
       for (let i = 0; i < text.length; i += maxChars) {
         lines.push(text.substring(i, i + maxChars));
@@ -479,7 +541,6 @@
       const numSlices = activeList.length;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       if (numSlices === 0) return;
 
       const sliceAngle = (2 * Math.PI) / numSlices;
@@ -488,27 +549,17 @@
       ctx.translate(radius, radius);
 
       const nameHeader = headers[0];
-
-      // Dynamic Font Scaling to fit high slice counts
       let fontSize = 15;
-      let maxChars = 26; // High character count ensures single-line text along radial space
+      let maxChars = 26;
 
-      if (numSlices > 35) {
-        fontSize = 10;
-        maxChars = 22;
-      } else if (numSlices > 25) {
-        fontSize = 12;
-        maxChars = 24;
-      } else if (numSlices > 15) {
-        fontSize = 13;
-        maxChars = 25;
-      }
+      if (numSlices > 35) { fontSize = 10; maxChars = 22; }
+      else if (numSlices > 25) { fontSize = 12; maxChars = 24; }
+      else if (numSlices > 15) { fontSize = 13; maxChars = 25; }
 
       activeList.forEach((meal, i) => {
         const startAngle = i * sliceAngle + currentAngle;
         const endAngle = startAngle + sliceAngle;
 
-        // Draw Slice
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.arc(0, 0, radius, startAngle, endAngle);
@@ -518,7 +569,6 @@
         ctx.strokeStyle = "#0f172a";
         ctx.stroke();
 
-        // Draw Text along radial length
         ctx.save();
         ctx.rotate(startAngle + sliceAngle / 2);
         ctx.textAlign = "right";
@@ -539,7 +589,6 @@
         ctx.restore();
       });
 
-      // Center Cap
       ctx.beginPath();
       ctx.arc(0, 0, 40, 0, 2 * Math.PI);
       ctx.fillStyle = "#1e293b";
@@ -604,7 +653,8 @@
 
     function showWinnerModal(winner) {
       const nameHeader = headers[0];
-      document.getElementById("modalTitle").innerText = `🎉 ${winner[nameHeader]}`;
+      currentSelectedRestaurant = winner[nameHeader];
+      document.getElementById("modalTitle").innerText = `🎉 ${currentSelectedRestaurant}`;
 
       let detailsHTML = "";
       headers.slice(1).forEach(h => {
@@ -618,7 +668,117 @@
       });
 
       document.getElementById("modalDetails").innerHTML = detailsHTML;
+      
+      // Reset Form State
+      setRating(0);
+      document.getElementById("dishInput").value = "";
+      document.getElementById("reviewInput").value = "";
+      document.getElementById("submitStatus").innerText = "";
+
+      // Load Reviews UI
+      updateModalReviewsUI(currentSelectedRestaurant);
+
       document.getElementById("winnerModal").classList.add("active");
+    }
+
+    function updateModalReviewsUI(restaurantName) {
+      const matches = allReviewsCache.filter(r => r.Restaurant === restaurantName);
+      
+      // Calculate Average Rating
+      const ratings = matches.map(r => Number(r.Rating)).filter(n => n > 0);
+      if (ratings.length > 0) {
+        const avg = (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1);
+        document.getElementById("averageRatingText").innerText = `⭐ ${avg} / 5.0 (${ratings.length} reviews)`;
+      } else {
+        document.getElementById("averageRatingText").innerText = "No ratings submitted yet. Be the first!";
+      }
+
+      // Display Recommended Dishes
+      const dishesRaw = matches.map(r => r.RecommendedDishes).filter(d => d && d.trim() !== "");
+      const dishesContainer = document.getElementById("recommendedDishesContainer");
+      
+      if (dishesRaw.length > 0) {
+        let allDishes = [];
+        dishesRaw.forEach(d => {
+          const split = d.split(',').map(item => item.trim()).filter(Boolean);
+          allDishes.push(...split);
+        });
+        
+        dishesContainer.innerHTML = allDishes.map(d => `<span class="dish-tag">🍲 ${d}</span>`).join("");
+      } else {
+        dishesContainer.innerText = "No dishes recommended yet.";
+      }
+    }
+
+    // Interactive Star Rating Logic
+    document.querySelectorAll('.star-rating .star').forEach(star => {
+      star.addEventListener('click', function() {
+        setRating(parseInt(this.getAttribute('data-value')));
+      });
+    });
+
+    function setRating(val) {
+      selectedRating = val;
+      document.querySelectorAll('.star-rating .star').forEach(star => {
+        const v = parseInt(star.getAttribute('data-value'));
+        if (v <= val) star.classList.add('active');
+        else star.classList.remove('active');
+      });
+    }
+
+    async function submitReview() {
+      if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("YOUR_COPIED_WEB_APP_URL_HERE")) {
+        alert("Please paste your Google Apps Script Web App URL into line 235 of the code!");
+        return;
+      }
+
+      const dish = document.getElementById("dishInput").value.trim();
+      const review = document.getElementById("reviewInput").value.trim();
+      const status = document.getElementById("submitStatus");
+
+      if (selectedRating === 0 && !dish && !review) {
+        status.style.color = "#f87171";
+        status.innerText = "Please provide a star rating or dish recommendation!";
+        return;
+      }
+
+      status.style.color = "#38bdf8";
+      status.innerText = "Submitting review...";
+
+      const payload = {
+        restaurant: currentSelectedRestaurant,
+        rating: selectedRating,
+        dishes: dish,
+        review: review
+      };
+
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        status.style.color = "#4ade80";
+        status.innerText = "✅ Thank you! Review saved.";
+        
+        // Optimistically update local cache
+        allReviewsCache.push({
+          Restaurant: currentSelectedRestaurant,
+          Rating: selectedRating,
+          RecommendedDishes: dish,
+          ReviewText: review
+        });
+
+        setTimeout(() => {
+          updateModalReviewsUI(currentSelectedRestaurant);
+        }, 600);
+
+      } catch (err) {
+        status.style.color = "#f87171";
+        status.innerText = "Failed to submit. Please try again.";
+      }
     }
 
     function closeModal() {
