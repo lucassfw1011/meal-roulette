@@ -306,7 +306,7 @@
       return result;
     }
 
-    // Strips redundant restaurant words for cleaner display on the wheel
+    // Strips common filler words for cleaner wheel rendering
     function cleanWheelName(name) {
       if (!name) return "";
       return name
@@ -447,7 +447,7 @@
       });
     }
 
-    function splitTextToLines(text, maxChars = 10) {
+    function splitTextToLines(text, maxChars = 24) {
       if (!text) return [];
       
       if (text.includes(' ')) {
@@ -489,19 +489,19 @@
 
       const nameHeader = headers[0];
 
-      // Dynamic Font & Character Limit Adjustment
-      let fontSize = 16;
-      let maxChars = 10;
+      // Dynamic Font Scaling to fit high slice counts
+      let fontSize = 15;
+      let maxChars = 26; // High character count ensures single-line text along radial space
 
       if (numSlices > 35) {
         fontSize = 10;
-        maxChars = 6;
+        maxChars = 22;
       } else if (numSlices > 25) {
         fontSize = 12;
-        maxChars = 8;
+        maxChars = 24;
       } else if (numSlices > 15) {
-        fontSize = 14;
-        maxChars = 9;
+        fontSize = 13;
+        maxChars = 25;
       }
 
       activeList.forEach((meal, i) => {
@@ -518,7 +518,7 @@
         ctx.strokeStyle = "#0f172a";
         ctx.stroke();
 
-        // Draw Text (with cleaned name)
+        // Draw Text along radial length
         ctx.save();
         ctx.rotate(startAngle + sliceAngle / 2);
         ctx.textAlign = "right";
@@ -533,7 +533,7 @@
         const startY = -((lines.length - 1) * lineHeight) / 2;
 
         lines.forEach((line, lineIdx) => {
-          ctx.fillText(line, radius - 20, startY + (lineIdx * lineHeight) + (fontSize / 3));
+          ctx.fillText(line, radius - 15, startY + (lineIdx * lineHeight) + (fontSize / 3));
         });
 
         ctx.restore();
