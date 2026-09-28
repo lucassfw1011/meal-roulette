@@ -31,10 +31,7 @@
       margin-bottom: 20px;
       transition: background 0.2s, color 0.2s;
     }
-    .header-btn:hover {
-      background-color: #334155;
-      color: #ffffff;
-    }
+    .header-btn:hover { background-color: #334155; color: #ffffff; }
 
     /* Filters Box */
     .filter-container {
@@ -56,128 +53,49 @@
       gap: 12px;
     }
 
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .filter-group label {
-      font-size: 12px;
-      color: #94a3b8;
-      font-weight: 600;
-    }
+    .filter-group { display: flex; flex-direction: column; gap: 4px; }
+    .filter-group label { font-size: 12px; color: #94a3b8; font-weight: 600; }
     .filter-group select {
-      background: #0f172a;
-      color: #fff;
-      border: 1px solid #334155;
-      border-radius: 6px;
-      padding: 8px;
-      font-size: 13px;
-      outline: none;
+      background: #0f172a; color: #fff; border: 1px solid #334155;
+      border-radius: 6px; padding: 8px; font-size: 13px; outline: none;
     }
 
     /* Meal Chips Layout */
     .meal-chips-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      border-top: 1px solid #334155;
-      padding-top: 14px;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 8px; border-top: 1px solid #334155; padding-top: 14px;
     }
-
-    .meal-chips-section .section-label {
-      font-size: 12px;
-      color: #94a3b8;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .top-chip-row {
-      display: flex;
-      justify-content: center;
-      width: 100%;
-    }
-
-    .sub-chips-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px;
-    }
+    .meal-chips-section .section-label { font-size: 12px; color: #94a3b8; font-weight: 600; }
+    .top-chip-row { display: flex; justify-content: center; width: 100%; }
+    .sub-chips-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 
     .chip-btn {
-      background: #0f172a;
-      color: #94a3b8;
-      border: 1px solid #334155;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      user-select: none;
-      transition: all 0.2s ease;
+      background: #0f172a; color: #94a3b8; border: 1px solid #334155;
+      padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s ease;
     }
-    .chip-btn:hover {
-      border-color: #38bdf8;
-      color: #f8fafc;
-    }
-    .chip-btn.active {
-      background: #38bdf8;
-      color: #0f172a;
-      border-color: #38bdf8;
-    }
+    .chip-btn:hover { border-color: #38bdf8; color: #f8fafc; }
+    .chip-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
 
     .clear-btn {
-      background: transparent;
-      color: #ef4444;
-      border: 1px solid #ef4444;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      cursor: pointer;
-      align-self: flex-end;
-      margin-top: -8px;
+      background: transparent; color: #ef4444; border: 1px solid #ef4444;
+      padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;
+      align-self: flex-end; margin-top: -8px;
     }
-    .clear-btn:hover {
-      background: #ef4444;
-      color: #fff;
-    }
+    .clear-btn:hover { background: #ef4444; color: #fff; }
 
     /* Wheel Canvas */
-    .wheel-wrapper {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
+    .wheel-wrapper { position: relative; display: flex; flex-direction: column; align-items: center; }
     .pointer {
-      width: 0;
-      height: 0;
-      border-left: 14px solid transparent;
-      border-right: 14px solid transparent;
-      border-top: 24px solid #f59e0b;
-      position: absolute;
-      top: -12px;
-      z-index: 10;
+      width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent;
+      border-top: 24px solid #f59e0b; position: absolute; top: -12px; z-index: 10;
     }
-
-    #wheelCanvas {
-      background: transparent;
-    }
+    #wheelCanvas { background: transparent; }
 
     .spin-btn {
-      margin-top: 20px;
-      background: #f59e0b;
-      color: #0f172a;
-      border: none;
-      padding: 14px 40px;
-      font-size: 18px;
-      font-weight: 800;
-      border-radius: 30px;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+      margin-top: 20px; background: #f59e0b; color: #0f172a; border: none;
+      padding: 14px 40px; font-size: 18px; font-weight: 800; border-radius: 30px;
+      cursor: pointer; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
       transition: transform 0.1s, background 0.2s;
     }
     .spin-btn:hover { background: #d97706; }
@@ -185,30 +103,35 @@
 
     /* Modal */
     .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.75);
-      z-index: 100;
-      justify-content: center;
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75); z-index: 100; justify-content: center;
       align-items: center;
     }
     .modal {
-      background: #1e293b;
-      border: 1px solid #334155;
-      padding: 24px;
-      border-radius: 16px;
-      max-width: 360px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+      background: #1e293b; border: 1px solid #334155; padding: 24px;
+      border-radius: 16px; max-width: 440px; width: 92%; max-height: 85vh;
+      overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
     }
-    .modal h2 { margin-top: 0; color: #38bdf8; }
-    .modal p { color: #cbd5e1; font-size: 14px; margin: 8px 0; }
-    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
-    .modal-btn {
-      flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;
+    .modal h2 { margin-top: 0; color: #38bdf8; text-align: center; }
+
+    /* Review Summary Card */
+    .review-summary-card {
+      background: #0f172a; border: 1px solid #334155; border-radius: 10px;
+      padding: 12px; margin: 12px 0; font-size: 13px;
     }
+    .summary-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid #334155; padding-bottom: 8px; margin-bottom: 8px;
+    }
+    .avg-stars { color: #f59e0b; font-weight: bold; font-size: 15px; }
+
+    .reviews-list-modal { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .modal-review-item {
+      background: #182232; border-radius: 6px; padding: 8px 10px; font-size: 12px;
+    }
+
+    .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .modal-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
     .modal-btn.primary { background: #38bdf8; color: #0f172a; }
     .modal-btn.secondary { background: #334155; color: #fff; }
   </style>
@@ -218,19 +141,13 @@
   <a href="review.html" class="header-btn">✍️ Write a Review / Search Restaurants</a>
 
   <div class="filter-container">
-    <!-- Standard Dropdowns (Category, Price, Location, Off Day) -->
     <div class="dropdown-row" id="dropdownRow"></div>
 
-    <!-- Meal Time Chips Section -->
     <div class="meal-chips-section">
       <span class="section-label">Meal Session / Business Hour:</span>
-      
-      <!-- Top Row: Centered All Day -->
       <div class="top-chip-row">
         <button class="chip-btn active" id="chipAllDay" onclick="toggleMealChip('All Day')">All Day</button>
       </div>
-
-      <!-- Bottom Row: Meal Options -->
       <div class="sub-chips-row">
         <button class="chip-btn" data-meal="Breakfast" onclick="toggleMealChip('Breakfast')">Breakfast</button>
         <button class="chip-btn" data-meal="Lunch" onclick="toggleMealChip('Lunch')">Lunch</button>
@@ -254,26 +171,58 @@
   <div class="modal-overlay" id="winnerModal">
     <div class="modal">
       <h2 id="winnerTitle">Restaurant Name</h2>
-      <div id="winnerDetails" style="text-align: left; margin: 16px 0;"></div>
+      <div id="winnerDetails" style="text-align: left; font-size: 13px; color: #cbd5e1;"></div>
+
+      <!-- Review Summary Box -->
+      <div class="review-summary-card">
+        <div class="summary-header">
+          <div>
+            <span style="font-weight: bold; color: #38bdf8;">Reviews Summary</span>
+            <span id="reviewCountTag" style="color: #94a3b8; font-size: 11px; margin-left: 4px;">(0 reviews)</span>
+          </div>
+          <div class="avg-stars" id="avgRatingDisplay">N/A</div>
+        </div>
+
+        <div id="topDishesDisplay" style="color: #f59e0b; font-size: 12px; margin-bottom: 6px;"></div>
+
+        <!-- Sort controls for reviews -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+          <span style="font-size: 11px; color: #94a3b8;">Customer Reviews:</span>
+          <select id="reviewSortSelect" onchange="renderModalReviews()" style="background: #0f172a; color: #fff; border: 1px solid #334155; font-size: 11px; border-radius: 4px; padding: 2px 4px;">
+            <option value="newest">Newest First</option>
+            <option value="highest">Highest Rating</option>
+            <option value="lowest">Lowest Rating</option>
+          </select>
+        </div>
+
+        <div class="reviews-list-modal" id="modalReviewsList"></div>
+      </div>
+
       <div class="modal-actions">
         <button class="modal-btn secondary" onclick="closeModal()">Close</button>
-        <button class="modal-btn primary" id="reviewRedirectBtn">View / Review</button>
+        <button class="modal-btn primary" id="reviewRedirectBtn">Write / View All Reviews</button>
       </div>
     </div>
   </div>
 
   <script>
     const SHEET_ID = '1U2cY66OYCC7xnrvJ65nCOFcOWyGPkfLYe_-ogoFXaIU';
-    const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+    const MEAL_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+    
+    // GID for the Reviews tab
+    const REVIEWS_TAB_GID = '324231370';
+    const REVIEWS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${REVIEWS_TAB_GID}`;
 
     const MEAL_COLUMNS = ['Breakfast', 'Lunch', 'Teatime', 'Dinner', 'Supper'];
     let rawRows = [];
     let headers = [];
-    let dropdownFilters = {}; // Category, Price, Location, Off Day
-    let selectedMeals = [];   // empty or array like ['Lunch', 'Dinner']
+    let allReviews = [];
+    let currentWinnerReviews = [];
+
+    let dropdownFilters = {};
+    let selectedMeals = [];
     let isAllDaySelected = true;
 
-    // Wheel state
     let filteredRestaurants = [];
     let currentAngle = 0;
     let isSpinning = false;
@@ -292,45 +241,55 @@
       result.push(cell.trim()); return result;
     }
 
-    async function loadSheetData() {
+    async function initData() {
+      // 1. Fetch Restaurants
       try {
-        const response = await fetch(CSV_URL);
-        const csvText = await response.text();
-        const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
-        if (lines.length < 2) return;
+        const res = await fetch(MEAL_CSV_URL);
+        const text = await res.text();
+        const lines = text.split(/\r?\n/).filter(l => l.trim());
+        if (lines.length > 1) {
+          headers = parseCSVLine(lines[0]);
+          rawRows = lines.slice(1).map(l => {
+            const cells = parseCSVLine(l);
+            const obj = {};
+            headers.forEach((h, i) => { obj[h] = cells[i] || ''; });
+            return obj;
+          });
+          renderDropdownFilters();
+          applyFiltersAndDraw();
+        }
+      } catch(e) { console.error("Error loading restaurants", e); }
 
-        headers = parseCSVLine(lines[0]);
-        rawRows = lines.slice(1).map(line => {
-          const cells = parseCSVLine(line);
-          const obj = {};
-          headers.forEach((h, i) => { obj[h] = cells[i] || ''; });
-          return obj;
-        });
-
-        renderDropdownFilters();
-        applyFiltersAndDraw();
-      } catch(e) { console.error("CSV Load Error:", e); }
+      // 2. Fetch Reviews Data
+      try {
+        const res = await fetch(REVIEWS_CSV_URL);
+        const text = await res.text();
+        const lines = text.split(/\r?\n/).filter(l => l.trim());
+        if (lines.length > 1) {
+          const revHeaders = parseCSVLine(lines[0]);
+          allReviews = lines.slice(1).map(l => {
+            const cells = parseCSVLine(l);
+            const obj = {};
+            revHeaders.forEach((h, i) => { obj[h] = cells[i] || ''; });
+            return obj;
+          });
+        }
+      } catch(e) { console.error("Error loading reviews tab", e); }
     }
 
     function renderDropdownFilters() {
       const dropdownRow = document.getElementById("dropdownRow");
       dropdownRow.innerHTML = "";
-
-      // Non-meal dropdown columns
       const ignoreCols = ["Restaurant", ...MEAL_COLUMNS];
 
       headers.forEach(h => {
         if (ignoreCols.includes(h)) return;
-
-        // Get unique options
         const uniqueVals = [...new Set(rawRows.map(r => r[h]).filter(Boolean))].sort();
 
         const group = document.createElement("div");
         group.className = "filter-group";
-        
         const label = document.createElement("label");
         label.innerText = h + ":";
-
         const select = document.createElement("select");
         select.innerHTML = `<option value="">All</option>` + uniqueVals.map(v => `<option value="${v}">${v}</option>`).join("");
         select.onchange = (e) => {
@@ -380,21 +339,15 @@
 
     function applyFiltersAndDraw() {
       filteredRestaurants = rawRows.filter(row => {
-        // 1. Dropdown matching
         for (const [key, val] of Object.entries(dropdownFilters)) {
           if (val && row[key] !== val) return false;
         }
-
-        // 2. Meal 1/0 column matching
         if (!isAllDaySelected && selectedMeals.length > 0) {
-          // Restaurant must have a "1" in AT LEAST ONE selected meal time
           const matchesAnyMeal = selectedMeals.some(meal => row[meal] === "1");
           if (!matchesAnyMeal) return false;
         }
-
         return true;
       });
-
       drawWheel();
     }
 
@@ -403,9 +356,7 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       if (numItems === 0) {
-        ctx.fillStyle = "#94a3b8";
-        ctx.font = "16px sans-serif";
-        ctx.textAlign = "center";
+        ctx.fillStyle = "#94a3b8"; ctx.font = "16px sans-serif"; ctx.textAlign = "center";
         ctx.fillText("No restaurants match filters!", canvas.width / 2, canvas.height / 2);
         return;
       }
@@ -414,59 +365,45 @@
       const centerY = canvas.height / 2;
       const radius = canvas.width / 2 - 10;
       const sliceAngle = (2 * Math.PI) / numItems;
-
       const colors = ['#f43f5e', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#3b82f6'];
 
       filteredRestaurants.forEach((r, i) => {
         const angle = currentAngle + i * sliceAngle;
-
-        // Draw Slice
         ctx.beginPath();
         ctx.moveTo(centerX, centerY);
         ctx.arc(centerX, centerY, radius, angle, angle + sliceAngle);
         ctx.closePath();
         ctx.fillStyle = colors[i % colors.length];
         ctx.fill();
-        ctx.strokeStyle = '#0f172a';
-        ctx.lineWidth = 2;
-        ctx.stroke();
+        ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2; ctx.stroke();
 
-        // Draw Text
         ctx.save();
         ctx.translate(centerX, centerY);
         ctx.rotate(angle + sliceAngle / 2);
-        ctx.textAlign = "right";
-        ctx.fillStyle = "#ffffff";
+        ctx.textAlign = "right"; ctx.fillStyle = "#ffffff";
         ctx.font = "bold 12px sans-serif";
         ctx.fillText(r.Restaurant || "", radius - 15, 4);
         ctx.restore();
       });
 
-      // Center Knob
       ctx.beginPath();
       ctx.arc(centerX, centerY, 24, 0, 2 * Math.PI);
-      ctx.fillStyle = '#0f172a';
-      ctx.fill();
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 3;
-      ctx.stroke();
+      ctx.fillStyle = '#0f172a'; ctx.fill();
+      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 3; ctx.stroke();
     }
 
     function spinWheel() {
       if (isSpinning || filteredRestaurants.length === 0) return;
       isSpinning = true;
-
-      const spinAngle = Math.random() * 10 + 20; // 20 - 30 rotations
-      const duration = 4000; // ms
+      const spinAngle = Math.random() * 10 + 20;
+      const duration = 4000;
       const start = performance.now();
       const initialAngle = currentAngle;
 
       function animate(time) {
         const elapsed = time - start;
         const progress = Math.min(elapsed / duration, 1);
-        // Ease out quadratic
         const easeOut = 1 - Math.pow(1 - progress, 3);
-
         currentAngle = initialAngle + easeOut * spinAngle;
         drawWheel();
 
@@ -483,8 +420,6 @@
     function showWinner() {
       const numItems = filteredRestaurants.length;
       const sliceAngle = (2 * Math.PI) / numItems;
-      
-      // Calculate which slice landed under pointer (-90 degrees / top)
       let normalizedAngle = (3 * Math.PI / 2 - (currentAngle % (2 * Math.PI))) % (2 * Math.PI);
       if (normalizedAngle < 0) normalizedAngle += 2 * Math.PI;
 
@@ -492,14 +427,20 @@
       const winner = filteredRestaurants[winningIndex];
 
       document.getElementById("winnerTitle").innerText = winner.Restaurant;
-      
+
       let detailsHtml = "";
       for (const [key, val] of Object.entries(winner)) {
-        if (key !== "Restaurant" && val && val !== "0") {
-          detailsHtml += `<p><strong>${key}:</strong> ${val === "1" ? "Yes" : val}</p>`;
+        if (key !== "Restaurant" && val && val !== "0" && !MEAL_COLUMNS.includes(key)) {
+          detailsHtml += `<p style="margin:4px 0;"><strong>${key}:</strong> ${val}</p>`;
         }
       }
       document.getElementById("winnerDetails").innerHTML = detailsHtml;
+
+      // Filter reviews for this restaurant
+      currentWinnerReviews = allReviews.filter(r => (r.Restaurant || '').toLowerCase() === winner.Restaurant.toLowerCase());
+      
+      processReviewSummary();
+      renderModalReviews();
 
       document.getElementById("reviewRedirectBtn").onclick = () => {
         window.location.href = `review.html?restaurant=${encodeURIComponent(winner.Restaurant)}`;
@@ -508,11 +449,74 @@
       document.getElementById("winnerModal").style.display = "flex";
     }
 
+    function processReviewSummary() {
+      const count = currentWinnerReviews.length;
+      document.getElementById("reviewCountTag").innerText = `(${count} review${count === 1 ? '' : 's'})`;
+
+      if (count === 0) {
+        document.getElementById("avgRatingDisplay").innerText = "No Ratings";
+        document.getElementById("topDishesDisplay").innerText = "";
+        return;
+      }
+
+      // Calculate Average Rating
+      const totalRating = currentWinnerReviews.reduce((sum, r) => sum + (parseFloat(r.Rating) || 0), 0);
+      const avg = (totalRating / count).toFixed(1);
+      document.getElementById("avgRatingDisplay").innerText = `★ ${avg} / 5`;
+
+      // Extract & Count Recommended Dishes
+      const dishCounts = {};
+      currentWinnerReviews.forEach(r => {
+        const dishStr = r.RecommendedDish || r.RecommendedDishes || '';
+        if (dishStr) {
+          dishStr.split(',').forEach(d => {
+            const clean = d.trim();
+            if (clean) dishCounts[clean] = (dishCounts[clean] || 0) + 1;
+          });
+        }
+      });
+
+      const topDishes = Object.keys(dishCounts).sort((a,b) => dishCounts[b] - dishCounts[a]).slice(0, 3);
+      if (topDishes.length > 0) {
+        document.getElementById("topDishesDisplay").innerHTML = `<b>Must Try:</b> ${topDishes.join(', ')}`;
+      } else {
+        document.getElementById("topDishesDisplay").innerText = "";
+      }
+    }
+
+    function renderModalReviews() {
+      const listContainer = document.getElementById("modalReviewsList");
+      if (currentWinnerReviews.length === 0) {
+        listContainer.innerHTML = `<div style="color:#94a3b8; text-align:center; padding:8px;">No reviews yet. Be the first to leave one!</div>`;
+        return;
+      }
+
+      const sortMode = document.getElementById("reviewSortSelect").value;
+      const sorted = [...currentWinnerReviews].sort((a, b) => {
+        const rA = parseFloat(a.Rating) || 0;
+        const rB = parseFloat(b.Rating) || 0;
+        if (sortMode === 'highest') return rB - rA;
+        if (sortMode === 'lowest') return rA - rB;
+        return 0; // default order (newest/sheet order)
+      });
+
+      listContainer.innerHTML = sorted.map(r => `
+        <div class="modal-review-item">
+          <div style="display:flex; justify-content:space-between; color:#f59e0b; font-weight:bold;">
+            <span>${'★'.repeat(parseInt(r.Rating) || 0)}</span>
+            <span style="font-size:10px; color:#64748b;">${r.Timestamp || ''}</span>
+          </div>
+          ${r.RecommendedDish || r.RecommendedDishes ? `<div style="color:#38bdf8; font-size:11px; margin-top:2px;">👍 ${r.RecommendedDish || r.RecommendedDishes}</div>` : ''}
+          ${r.Review ? `<div style="color:#cbd5e1; margin-top:4px;">"${r.Review}"</div>` : ''}
+        </div>
+      `).join("");
+    }
+
     function closeModal() {
       document.getElementById("winnerModal").style.display = "none";
     }
 
-    loadSheetData();
+    initData();
   </script>
 </body>
 </html>
