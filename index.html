@@ -6,7 +6,7 @@
   <title>Meal Roulette</title>
   <style>
     body {
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: #0f172a;
       color: #ffffff;
       display: flex;
@@ -19,49 +19,56 @@
       box-sizing: border-box;
     }
     h1 {
-      margin-bottom: 10px;
+      margin-bottom: 20px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
     }
     .filters {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       align-items: flex-end;
-      gap: 15px;
-      margin-bottom: 20px;
+      gap: 12px;
+      margin-bottom: 24px;
     }
     .filter-group {
       position: relative;
       display: inline-block;
     }
     .filter-group label {
-      font-weight: bold;
-      font-size: 14px;
+      font-weight: 500;
+      font-size: 13px;
       display: block;
-      margin-bottom: 4px;
-      color: #fff;
+      margin-bottom: 6px;
+      color: #94a3b8;
     }
     .dropdown-btn {
-      padding: 8px 14px;
-      border-radius: 6px;
-      font-size: 14px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 400;
       background: #1e293b;
-      color: #fff;
-      border: 1px solid #475569;
+      color: #f8fafc;
+      border: 1px solid #334155;
       cursor: pointer;
-      min-width: 140px;
+      min-width: 130px;
       text-align: left;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      transition: border-color 0.15s ease;
+    }
+    .dropdown-btn:hover {
+      border-color: #64748b;
     }
     .dropdown-content {
       display: none;
       position: absolute;
       background-color: #1e293b;
       min-width: 180px;
-      box-shadow: 0px 8px 16px rgba(0,0,0,0.4);
-      border: 1px solid #475569;
-      border-radius: 6px;
+      box-shadow: 0px 10px 25px rgba(0,0,0,0.5);
+      border: 1px solid #334155;
+      border-radius: 8px;
       padding: 8px;
       z-index: 10;
       max-height: 200px;
@@ -74,10 +81,11 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 4px 6px;
-      font-size: 14px;
+      padding: 6px 8px;
+      font-size: 13px;
       cursor: pointer;
       border-radius: 4px;
+      color: #e2e8f0;
     }
     .dropdown-item:hover {
       background-color: #334155;
@@ -87,67 +95,75 @@
     }
     .clear-btn {
       padding: 8px 14px;
-      border-radius: 6px;
-      font-size: 14px;
-      background-color: #334155;
-      color: #f1f5f9;
-      border: 1px solid #475569;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      background-color: #1e293b;
+      color: #94a3b8;
+      border: 1px solid #334155;
       cursor: pointer;
-      transition: background-color 0.2s, color 0.2s;
-      height: 35px;
+      transition: all 0.2s ease;
+      height: 36px;
     }
     .clear-btn:hover {
       background-color: #ef4444;
       color: #ffffff;
+      border-color: #ef4444;
     }
     .wheel-container {
       position: relative;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       display: flex;
       justify-content: center;
     }
-    /* Indicator Arrow Pointer */
     .pointer-arrow {
       position: absolute;
-      top: -12px;
+      top: -10px;
       left: 50%;
       transform: translateX(-50%);
       width: 0;
       height: 0;
-      border-left: 16px solid transparent;
-      border-right: 16px solid transparent;
-      border-top: 28px solid #f59e0b;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 24px solid #f59e0b;
       z-index: 5;
-      filter: drop-shadow(0px 3px 5px rgba(0,0,0,0.5));
+      filter: drop-shadow(0px 3px 6px rgba(0,0,0,0.4));
     }
     canvas {
+      width: 400px;
+      height: 400px;
       border-radius: 50%;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
     }
     #spinBtn {
       background-color: #f59e0b;
       color: #0f172a;
-      font-weight: bold;
-      font-size: 18px;
-      padding: 12px 24px;
+      font-weight: 600;
+      font-size: 16px;
+      padding: 12px 32px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.2s;
+      transition: background-color 0.2s, transform 0.1s;
     }
     #spinBtn:hover {
       background-color: #d97706;
     }
+    #spinBtn:active {
+      transform: scale(0.98);
+    }
     #spinBtn:disabled {
-      background-color: #64748b;
+      background-color: #475569;
+      color: #94a3b8;
       cursor: not-allowed;
     }
     #result {
-      font-size: 22px;
-      font-weight: bold;
-      margin-top: 15px;
-      min-height: 30px;
+      font-size: 18px;
+      font-weight: 500;
+      margin-top: 16px;
+      min-height: 28px;
       text-align: center;
+      color: #cbd5e1;
     }
 
     /* Modal / Pop-Up Styling */
@@ -158,7 +174,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(15, 23, 42, 0.8);
+      background: rgba(15, 23, 42, 0.85);
       backdrop-filter: blur(4px);
       z-index: 100;
       justify-content: center;
@@ -169,10 +185,10 @@
     }
     .modal-card {
       background: #1e293b;
-      border: 1px solid #475569;
+      border: 1px solid #334155;
       border-radius: 12px;
       width: 90%;
-      max-width: 420px;
+      max-width: 400px;
       padding: 24px;
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
       position: relative;
@@ -181,7 +197,8 @@
     .modal-card h2 {
       margin-top: 0;
       color: #f59e0b;
-      font-size: 24px;
+      font-size: 22px;
+      font-weight: 600;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -193,12 +210,13 @@
     }
     .modal-detail-item strong {
       color: #94a3b8;
+      font-weight: 500;
     }
     .modal-section-title {
       margin-top: 16px;
       margin-bottom: 6px;
-      font-weight: bold;
-      font-size: 14px;
+      font-weight: 600;
+      font-size: 13px;
       color: #38bdf8;
       border-top: 1px solid #334155;
       padding-top: 12px;
@@ -209,11 +227,11 @@
       padding: 10px;
       background: #f59e0b;
       color: #0f172a;
-      font-weight: bold;
+      font-weight: 600;
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 15px;
     }
     .modal-close-btn:hover {
       background: #d97706;
@@ -228,7 +246,7 @@
 
   <div class="wheel-container">
     <div class="pointer-arrow"></div>
-    <canvas id="wheelCanvas" width="400" height="400"></canvas>
+    <canvas id="wheelCanvas" width="600" height="600"></canvas>
   </div>
 
   <button id="spinBtn" onclick="spinWheel()">SPIN!</button>
@@ -365,7 +383,7 @@
             <label>${header}:</label>
             <button class="dropdown-btn" onclick="toggleDropdown('${header}')">
               <span>${buttonText}</span>
-              <span style="font-size: 10px;">▼</span>
+              <span style="font-size: 10px; color: #94a3b8;">▼</span>
             </button>
             <div id="dropdown-${safeHeaderId}" class="dropdown-content">
               ${availableOptions.map(val => `
@@ -434,25 +452,41 @@
 
       const nameHeader = headers[0];
 
+      // Dynamic Font Calculation based on number of items
+      let fontSize = 16;
+      if (numSlices > 30) fontSize = 10;
+      else if (numSlices > 20) fontSize = 12;
+      else if (numSlices > 12) fontSize = 14;
+
       activeList.forEach((meal, i) => {
         const startAngle = i * sliceAngle + currentAngle;
         const endAngle = startAngle + sliceAngle;
 
+        // Draw Slice
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.arc(0, 0, radius, startAngle, endAngle);
         ctx.fillStyle = colors[i % colors.length];
         ctx.fill();
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 2;
         ctx.strokeStyle = "#0f172a";
         ctx.stroke();
 
+        // Draw Text
         ctx.save();
         ctx.rotate(startAngle + sliceAngle / 2);
         ctx.textAlign = "right";
         ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 18px system-ui";
-        ctx.fillText(meal[nameHeader] || '', radius - 30, 6);
+        ctx.font = `500 ${fontSize}px system-ui, -apple-system, sans-serif`;
+
+        let text = meal[nameHeader] || '';
+        // Truncate long names to prevent overlap near center
+        const maxLen = numSlices > 20 ? 14 : 20;
+        if (text.length > maxLen) {
+          text = text.substring(0, maxLen - 1) + '…';
+        }
+
+        ctx.fillText(text, radius - 20, fontSize / 3);
         ctx.restore();
       });
       ctx.restore();
