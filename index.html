@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Meal Roulette</title>
   <style>
-    * { box-sizing: border-box; }
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: #0f172a;
@@ -16,219 +15,226 @@
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
+      box-sizing: border-box;
     }
-
-    .header-btn {
-      display: inline-block;
-      background-color: #1e293b;
-      color: #38bdf8;
-      border: 1px solid #334155;
-      padding: 10px 20px;
-      border-radius: 20px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 14px;
+    h1 { margin-top: 0; color: #38bdf8; font-size: 24px; text-align: center; }
+    
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      max-width: 600px;
       margin-bottom: 20px;
-      transition: background 0.2s, color 0.2s;
-    }
-    .header-btn:hover { background-color: #334155; color: #ffffff; }
-
-    /* Filters Box */
-    .filter-container {
       background: #1e293b;
       padding: 16px;
       border-radius: 12px;
       border: 1px solid #334155;
-      margin-bottom: 20px;
-      width: 100%;
-      max-width: 650px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
     }
-
-    .dropdown-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 12px;
-    }
-
     .filter-group { display: flex; flex-direction: column; gap: 4px; }
-    .filter-group label { font-size: 12px; color: #94a3b8; font-weight: 600; }
-    .filter-group select {
-      background: #0f172a; color: #fff; border: 1px solid #334155;
-      border-radius: 6px; padding: 8px; font-size: 13px; outline: none;
+    label { font-size: 11px; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
+    select {
+      background: #0f172a;
+      color: #f8fafc;
+      border: 1px solid #334155;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 14px;
     }
 
-    /* Meal Chips Layout */
-    .meal-chips-section {
-      display: flex; flex-direction: column; align-items: center;
-      gap: 8px; border-top: 1px solid #334155; padding-top: 14px;
+    .wheel-container {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      margin: 20px auto;
     }
-    .meal-chips-section .section-label { font-size: 12px; color: #94a3b8; font-weight: 600; }
-    .top-chip-row { display: flex; justify-content: center; width: 100%; }
-    .sub-chips-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-
-    .chip-btn {
-      background: #0f172a; color: #94a3b8; border: 1px solid #334155;
-      padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;
-      cursor: pointer; transition: all 0.2s ease;
+    canvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
     }
-    .chip-btn:hover { border-color: #38bdf8; color: #f8fafc; }
-    .chip-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
-
-    .clear-btn {
-      background: transparent; color: #ef4444; border: 1px solid #ef4444;
-      padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;
-      align-self: flex-end; margin-top: -8px;
-    }
-    .clear-btn:hover { background: #ef4444; color: #fff; }
-
-    /* Wheel Canvas */
-    .wheel-wrapper { position: relative; display: flex; flex-direction: column; align-items: center; }
     .pointer {
-      width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent;
-      border-top: 24px solid #f59e0b; position: absolute; top: -12px; z-index: 10;
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      border-top: 25px solid #f59e0b;
+      z-index: 10;
     }
-    #wheelCanvas { background: transparent; }
 
     .spin-btn {
-      margin-top: 20px; background: #f59e0b; color: #0f172a; border: none;
-      padding: 14px 40px; font-size: 18px; font-weight: 800; border-radius: 30px;
-      cursor: pointer; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
-      transition: transform 0.1s, background 0.2s;
+      background: #38bdf8;
+      color: #0f172a;
+      font-weight: 700;
+      font-size: 18px;
+      border: none;
+      padding: 12px 36px;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(56, 189, 248, 0.4);
+      transition: all 0.2s ease;
+      margin-top: 10px;
     }
-    .spin-btn:hover { background: #d97706; }
-    .spin-btn:active { transform: scale(0.95); }
+    .spin-btn:hover { background: #0284c7; color: #fff; transform: translateY(-2px); }
+    .spin-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-    /* Modal */
-    .modal-overlay {
-      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.75); z-index: 100; justify-content: center;
-      align-items: center;
-    }
+    /* Modal Overlay */
     .modal {
-      background: #1e293b; border: 1px solid #334155; padding: 24px;
-      border-radius: 16px; max-width: 440px; width: 92%; max-height: 85vh;
-      overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
     }
-    .modal h2 { margin-top: 0; color: #38bdf8; text-align: center; }
+    .modal-content {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    .modal h2 { margin-top: 0; color: #38bdf8; font-size: 22px; text-align: center; }
+    .modal p { margin: 8px 0; color: #cbd5e1; font-size: 14px; }
+    .modal strong { color: #f8fafc; }
 
-    /* Review Summary Card */
-    .review-summary-card {
-      background: #0f172a; border: 1px solid #334155; border-radius: 10px;
-      padding: 12px; margin: 12px 0; font-size: 13px;
+    .reviews-box {
+      margin-top: 16px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 12px;
+      max-height: 180px;
+      overflow-y: auto;
     }
-    .summary-header {
-      display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 1px solid #334155; padding-bottom: 8px; margin-bottom: 8px;
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 8px;
+      margin-bottom: 8px;
     }
-    .avg-stars { color: #f59e0b; font-weight: bold; font-size: 15px; }
-
-    .reviews-list-modal { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
-    .modal-review-item {
-      background: #182232; border-radius: 6px; padding: 8px 10px; font-size: 12px;
+    .review-item {
+      font-size: 12px;
+      padding: 6px 0;
+      border-bottom: 1px dashed #1e293b;
     }
-
-    .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
-    .modal-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-    .modal-btn.primary { background: #38bdf8; color: #0f172a; }
-    .modal-btn.secondary { background: #334155; color: #fff; }
+    .review-stars { color: #f59e0b; }
+    
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .modal-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .btn-close { background: #475569; color: #fff; }
+    .btn-review { background: #38bdf8; color: #0f172a; }
   </style>
 </head>
 <body>
 
-  <a href="review.html" class="header-btn">✍️ Write a Review / Search Restaurants</a>
+  <h1>🎡 Meal Roulette</h1>
 
-  <div class="filter-container">
-    <div class="dropdown-row" id="dropdownRow"></div>
-
-    <div class="meal-chips-section">
-      <span class="section-label">Meal Session / Business Hour:</span>
-      <div class="top-chip-row">
-        <button class="chip-btn active" id="chipAllDay" onclick="toggleMealChip('All Day')">All Day</button>
-      </div>
-      <div class="sub-chips-row">
-        <button class="chip-btn" data-meal="Breakfast" onclick="toggleMealChip('Breakfast')">Breakfast</button>
-        <button class="chip-btn" data-meal="Lunch" onclick="toggleMealChip('Lunch')">Lunch</button>
-        <button class="chip-btn" data-meal="Teatime" onclick="toggleMealChip('Teatime')">Teatime</button>
-        <button class="chip-btn" data-meal="Dinner" onclick="toggleMealChip('Dinner')">Dinner</button>
-        <button class="chip-btn" data-meal="Supper" onclick="toggleMealChip('Supper')">Supper</button>
-      </div>
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filter-group">
+      <label>Category</label>
+      <select id="filterCategory" onchange="applyFilters()"><option value="ALL">All Categories</option></select>
     </div>
-
-    <button class="clear-btn" onclick="clearAllFilters()">Clear All Filters</button>
+    <div class="filter-group">
+      <label>Meal Time</label>
+      <select id="filterMealTime" onchange="applyFilters()">
+        <option value="ALL">Any Time</option>
+        <option value="Breakfast">Breakfast</option>
+        <option value="Lunch">Lunch</option>
+        <option value="Teatime">Teatime</option>
+        <option value="Dinner">Dinner</option>
+        <option value="Supper">Supper</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Price</label>
+      <select id="filterPrice" onchange="applyFilters()"><option value="ALL">All Prices</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Location</label>
+      <select id="filterLocation" onchange="applyFilters()"><option value="ALL">All Locations</option></select>
+    </div>
   </div>
 
-  <div class="wheel-wrapper">
+  <!-- Wheel Canvas -->
+  <div class="wheel-container">
     <div class="pointer"></div>
-    <canvas id="wheelCanvas" width="400" height="400"></canvas>
+    <canvas id="wheelCanvas" width="320" height="320"></canvas>
   </div>
 
-  <button class="spin-btn" onclick="spinWheel()">SPIN!</button>
+  <button id="spinBtn" class="spin-btn" onclick="spinWheel()">SPIN!</button>
 
   <!-- Winner Modal -->
-  <div class="modal-overlay" id="winnerModal">
-    <div class="modal">
-      <h2 id="winnerTitle">Restaurant Name</h2>
-      <div id="winnerDetails" style="text-align: left; font-size: 13px; color: #cbd5e1;"></div>
+  <div id="resultModal" class="modal">
+    <div class="modal-content">
+      <h2 id="resName">Restaurant Name</h2>
+      
+      <p><strong>Category:</strong> <span id="resCategory"></span></p>
+      <p><strong>Price:</strong> <span id="resPrice"></span></p>
+      <p><strong>Location:</strong> <span id="resLocation"></span></p>
+      <p><strong>Off Day:</strong> <span id="resOffDay"></span></p>
+      <!-- Remark line added directly under Off Day -->
+      <p id="resRemarkContainer"><strong>Remark:</strong> <span id="resRemark"></span></p>
 
-      <!-- Review Summary Box -->
-      <div class="review-summary-card">
-        <div class="summary-header">
-          <div>
-            <span style="font-weight: bold; color: #38bdf8;">Reviews Summary</span>
-            <span id="reviewCountTag" style="color: #94a3b8; font-size: 11px; margin-left: 4px;">(0 reviews)</span>
-          </div>
-          <div class="avg-stars" id="avgRatingDisplay">N/A</div>
+      <div class="reviews-box">
+        <div class="review-header">
+          <span style="font-weight: 700; color: #38bdf8; font-size: 13px;">Reviews Summary</span>
+          <span id="resAvgRating" style="color: #f59e0b; font-weight: 700; font-size: 13px;">No Ratings</span>
         </div>
-
-        <div id="topDishesDisplay" style="color: #f59e0b; font-size: 12px; margin-bottom: 6px;"></div>
-
-        <!-- Sort controls for reviews -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-          <span style="font-size: 11px; color: #94a3b8;">Customer Reviews:</span>
-          <select id="reviewSortSelect" onchange="renderModalReviews()" style="background: #0f172a; color: #fff; border: 1px solid #334155; font-size: 11px; border-radius: 4px; padding: 2px 4px;">
-            <option value="newest">Newest First</option>
-            <option value="highest">Highest Rating</option>
-            <option value="lowest">Lowest Rating</option>
-          </select>
+        <div id="resReviewsList" style="color: #94a3b8; font-size: 12px; text-align: center; padding: 10px;">
+          No reviews yet. Be the first to leave one!
         </div>
-
-        <div class="reviews-list-modal" id="modalReviewsList"></div>
       </div>
 
       <div class="modal-actions">
-        <button class="modal-btn secondary" onclick="closeModal()">Close</button>
-        <button class="modal-btn primary" id="reviewRedirectBtn">Write / View All Reviews</button>
+        <button class="modal-btn btn-close" onclick="closeModal()">Close</button>
+        <a id="resReviewLink" href="#" class="modal-btn btn-review">Write / View All Reviews</a>
       </div>
     </div>
   </div>
 
   <script>
     const SHEET_ID = '1U2cY66OYCC7xnrvJ65nCOFcOWyGPkfLYe_-ogoFXaIU';
-    const MEAL_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
-    
-    // GID for the Reviews tab
+    const RESTAURANTS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
     const REVIEWS_TAB_GID = '324231370';
     const REVIEWS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${REVIEWS_TAB_GID}`;
 
-    const MEAL_COLUMNS = ['Breakfast', 'Lunch', 'Teatime', 'Dinner', 'Supper'];
-    let rawRows = [];
-    let headers = [];
-    let allReviews = [];
-    let currentWinnerReviews = [];
-
-    let dropdownFilters = {};
-    let selectedMeals = [];
-    let isAllDaySelected = true;
-
+    let allRestaurants = [];
     let filteredRestaurants = [];
-    let currentAngle = 0;
-    let isSpinning = false;
+    let allReviews = [];
 
-    const canvas = document.getElementById("wheelCanvas");
-    const ctx = canvas.getContext("2d");
+    let isSpinning = false;
+    let currentAngle = 0;
+    let currentWinner = null;
+
+    const COLORS = ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899'];
 
     function parseCSVLine(text) {
       const result = []; let cell = ''; let inQuotes = false;
@@ -241,26 +247,45 @@
       result.push(cell.trim()); return result;
     }
 
-    async function initData() {
+    function getProp(obj, possibleKeys) {
+      for (let key in obj) {
+        const cleanKey = key.trim().toLowerCase();
+        for (let pk of possibleKeys) {
+          if (cleanKey === pk.toLowerCase()) return obj[key];
+        }
+      }
+      return '';
+    }
+
+    async function init() {
       // 1. Fetch Restaurants
       try {
-        const res = await fetch(MEAL_CSV_URL);
+        const res = await fetch(RESTAURANTS_CSV_URL);
         const text = await res.text();
         const lines = text.split(/\r?\n/).filter(l => l.trim());
         if (lines.length > 1) {
-          headers = parseCSVLine(lines[0]);
-          rawRows = lines.slice(1).map(l => {
-            const cells = parseCSVLine(l);
-            const obj = {};
-            headers.forEach((h, i) => { obj[h] = cells[i] || ''; });
-            return obj;
-          });
-          renderDropdownFilters();
-          applyFiltersAndDraw();
+          allRestaurants = lines.slice(1).map(l => {
+            const c = parseCSVLine(l);
+            return {
+              name: c[0] || '',
+              category: c[1] || '',
+              price: c[2] || '',
+              location: c[3] || '',
+              breakfast: c[4] === '1',
+              lunch: c[5] === '1',
+              teatime: c[6] === '1',
+              dinner: c[7] === '1',
+              supper: c[8] === '1',
+              offDay: c[9] || 'None',
+              remark: c[10] || '' // Col K: Remark
+            };
+          }).filter(r => r.name);
+          populateFilterOptions();
+          applyFilters();
         }
       } catch(e) { console.error("Error loading restaurants", e); }
 
-      // 2. Fetch Reviews Data
+      // 2. Fetch Reviews
       try {
         const res = await fetch(REVIEWS_CSV_URL);
         const text = await res.text();
@@ -274,265 +299,203 @@
             return obj;
           });
         }
-      } catch(e) { console.error("Error loading reviews tab", e); }
+      } catch(e) { console.error("Error loading reviews", e); }
     }
 
-    function renderDropdownFilters() {
-      const dropdownRow = document.getElementById("dropdownRow");
-      dropdownRow.innerHTML = "";
-      const ignoreCols = ["Restaurant", ...MEAL_COLUMNS];
+    function populateFilterOptions() {
+      const categories = [...new Set(allRestaurants.map(r => r.category).filter(Boolean))].sort();
+      const prices = [...new Set(allRestaurants.map(r => r.price).filter(Boolean))].sort();
+      const locations = [...new Set(allRestaurants.map(r => r.location).filter(Boolean))].sort();
 
-      headers.forEach(h => {
-        if (ignoreCols.includes(h)) return;
-        const uniqueVals = [...new Set(rawRows.map(r => r[h]).filter(Boolean))].sort();
-
-        const group = document.createElement("div");
-        group.className = "filter-group";
-        const label = document.createElement("label");
-        label.innerText = h + ":";
-        const select = document.createElement("select");
-        select.innerHTML = `<option value="">All</option>` + uniqueVals.map(v => `<option value="${v}">${v}</option>`).join("");
-        select.onchange = (e) => {
-          dropdownFilters[h] = e.target.value;
-          applyFiltersAndDraw();
-        };
-
-        group.appendChild(label);
-        group.appendChild(select);
-        dropdownRow.appendChild(group);
-      });
+      populateSelect('filterCategory', categories);
+      populateSelect('filterPrice', prices);
+      populateSelect('filterLocation', locations);
     }
 
-    function toggleMealChip(meal) {
-      if (meal === 'All Day') {
-        isAllDaySelected = true;
-        selectedMeals = [];
-      } else {
-        isAllDaySelected = false;
-        if (selectedMeals.includes(meal)) {
-          selectedMeals = selectedMeals.filter(m => m !== meal);
-          if (selectedMeals.length === 0) isAllDaySelected = true;
-        } else {
-          selectedMeals.push(meal);
-        }
-      }
-      updateChipUI();
-      applyFiltersAndDraw();
+    function populateSelect(id, items) {
+      const el = document.getElementById(id);
+      const defaultText = el.options[0].text;
+      el.innerHTML = `<option value="ALL">${defaultText}</option>` + 
+        items.map(i => `<option value="${i}">${i}</option>`).join('');
     }
 
-    function updateChipUI() {
-      document.getElementById('chipAllDay').classList.toggle('active', isAllDaySelected);
-      document.querySelectorAll('.sub-chips-row .chip-btn').forEach(btn => {
-        const meal = btn.getAttribute('data-meal');
-        btn.classList.toggle('active', !isAllDaySelected && selectedMeals.includes(meal));
-      });
-    }
+    function applyFilters() {
+      const cat = document.getElementById('filterCategory').value;
+      const meal = document.getElementById('filterMealTime').value;
+      const prc = document.getElementById('filterPrice').value;
+      const loc = document.getElementById('filterLocation').value;
 
-    function clearAllFilters() {
-      dropdownFilters = {};
-      selectedMeals = [];
-      isAllDaySelected = true;
-      document.querySelectorAll('.dropdown-row select').forEach(s => s.value = "");
-      updateChipUI();
-      applyFiltersAndDraw();
-    }
-
-    function applyFiltersAndDraw() {
-      filteredRestaurants = rawRows.filter(row => {
-        for (const [key, val] of Object.entries(dropdownFilters)) {
-          if (val && row[key] !== val) return false;
-        }
-        if (!isAllDaySelected && selectedMeals.length > 0) {
-          const matchesAnyMeal = selectedMeals.some(meal => row[meal] === "1");
-          if (!matchesAnyMeal) return false;
+      filteredRestaurants = allRestaurants.filter(r => {
+        if (cat !== 'ALL' && r.category !== cat) return false;
+        if (prc !== 'ALL' && r.price !== prc) return false;
+        if (loc !== 'ALL' && r.location !== loc) return false;
+        if (meal !== 'ALL') {
+          const mealKey = meal.toLowerCase();
+          if (!r[mealKey]) return false;
         }
         return true;
       });
+
       drawWheel();
     }
 
     function drawWheel() {
-      const numItems = filteredRestaurants.length;
+      const canvas = document.getElementById('wheelCanvas');
+      const ctx = canvas.getContext('2d');
+      const numSlices = filteredRestaurants.length;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (numItems === 0) {
-        ctx.fillStyle = "#94a3b8"; ctx.font = "16px sans-serif"; ctx.textAlign = "center";
-        ctx.fillText("No restaurants match filters!", canvas.width / 2, canvas.height / 2);
+      if (numSlices === 0) {
+        ctx.fillStyle = '#f87171';
+        ctx.textAlign = 'center';
+        ctx.font = '14px sans-serif';
+        ctx.fillText('No restaurants match filters!', 160, 160);
+        document.getElementById('spinBtn').disabled = true;
         return;
       }
+      document.getElementById('spinBtn').disabled = false;
 
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
-      const radius = canvas.width / 2 - 10;
-      const sliceAngle = (2 * Math.PI) / numItems;
-      const colors = ['#f43f5e', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#3b82f6'];
+      const sliceAngle = (2 * Math.PI) / numSlices;
+      const centerX = 160, centerY = 160, radius = 155;
 
-      filteredRestaurants.forEach((r, i) => {
-        const angle = currentAngle + i * sliceAngle;
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      ctx.rotate(currentAngle);
+
+      for (let i = 0; i < numSlices; i++) {
+        const startAngle = i * sliceAngle;
+        const endAngle = startAngle + sliceAngle;
+
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.arc(centerX, centerY, radius, angle, angle + sliceAngle);
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, radius, startAngle, endAngle);
         ctx.closePath();
-        ctx.fillStyle = colors[i % colors.length];
+        ctx.fillStyle = COLORS[i % COLORS.length];
         ctx.fill();
-        ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 2;
+        ctx.stroke();
 
+        // Text
         ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(angle + sliceAngle / 2);
-        ctx.textAlign = "right"; ctx.fillStyle = "#ffffff";
+        ctx.rotate(startAngle + sliceAngle / 2);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 12px sans-serif';
         
-        // Dynamic Font Scaling based on number of items and text length
-        const text = r.Restaurant || "";
-        const maxRadiusWidth = radius - 35; // keep inside slice margin
-        
-        // Estimate max allowed height for slice
-        const maxSliceThickness = radius * Math.sin(sliceAngle / 2) * 1.5;
-        
-        let fontSize = Math.min(14, Math.max(8, Math.floor(maxSliceThickness)));
-        ctx.font = `bold ${fontSize}px sans-serif`;
-
-        // Scale down if string exceeds wedge radius
-        while (ctx.measureText(text).width > maxRadiusWidth && fontSize > 8) {
-          fontSize--;
-          ctx.font = `bold ${fontSize}px sans-serif`;
-        }
-
-        ctx.fillText(text, radius - 15, fontSize / 3);
+        let name = filteredRestaurants[i].name;
+        if (name.length > 16) name = name.substring(0, 14) + '...';
+        ctx.fillText(name, radius - 15, 4);
         ctx.restore();
-      });
+      }
 
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, 24, 0, 2 * Math.PI);
-      ctx.fillStyle = '#0f172a'; ctx.fill();
-      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 3; ctx.stroke();
+      ctx.restore();
     }
 
     function spinWheel() {
       if (isSpinning || filteredRestaurants.length === 0) return;
       isSpinning = true;
-      const spinAngle = Math.random() * 10 + 20;
+      document.getElementById('spinBtn').disabled = true;
+
+      const numSlices = filteredRestaurants.length;
+      const sliceAngle = (2 * Math.PI) / numSlices;
+      
+      const winningIndex = Math.floor(Math.random() * numSlices);
+      currentWinner = filteredRestaurants[winningIndex];
+
+      const extraRotations = (5 + Math.floor(Math.random() * 5)) * 2 * Math.PI;
+      const targetSliceCenter = (winningIndex * sliceAngle) + (sliceAngle / 2);
+      const targetAngle = extraRotations + ((3 * Math.PI / 2) - targetSliceCenter);
+
       const duration = 4000;
       const start = performance.now();
-      const initialAngle = currentAngle;
+      const startAngle = currentAngle % (2 * Math.PI);
 
       function animate(time) {
         const elapsed = time - start;
         const progress = Math.min(elapsed / duration, 1);
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        currentAngle = initialAngle + easeOut * spinAngle;
+        const easeOut = 1 - Math.pow(1 - progress, 4);
+
+        currentAngle = startAngle + (targetAngle - startAngle) * easeOut;
         drawWheel();
 
         if (progress < 1) {
           requestAnimationFrame(animate);
         } else {
           isSpinning = false;
-          showWinner();
+          showResultModal();
         }
       }
+
       requestAnimationFrame(animate);
     }
 
-    function showWinner() {
-      const numItems = filteredRestaurants.length;
-      const sliceAngle = (2 * Math.PI) / numItems;
-      let normalizedAngle = (3 * Math.PI / 2 - (currentAngle % (2 * Math.PI))) % (2 * Math.PI);
-      if (normalizedAngle < 0) normalizedAngle += 2 * Math.PI;
+    function showResultModal() {
+      if (!currentWinner) return;
 
-      const winningIndex = Math.floor(normalizedAngle / sliceAngle);
-      const winner = filteredRestaurants[winningIndex];
+      document.getElementById('resName').innerText = currentWinner.name;
+      document.getElementById('resCategory').innerText = currentWinner.category || '-';
+      document.getElementById('resPrice').innerText = currentWinner.price || '-';
+      document.getElementById('resLocation').innerText = currentWinner.location || '-';
+      document.getElementById('resOffDay').innerText = currentWinner.offDay || 'None';
 
-      document.getElementById("winnerTitle").innerText = winner.Restaurant;
-
-      let detailsHtml = "";
-      for (const [key, val] of Object.entries(winner)) {
-        if (key !== "Restaurant" && val && val !== "0" && !MEAL_COLUMNS.includes(key)) {
-          detailsHtml += `<p style="margin:4px 0;"><strong>${key}:</strong> ${val}</p>`;
-        }
-      }
-      document.getElementById("winnerDetails").innerHTML = detailsHtml;
-
-      // Filter reviews for this restaurant
-      currentWinnerReviews = allReviews.filter(r => (r.Restaurant || '').toLowerCase() === winner.Restaurant.toLowerCase());
-      
-      processReviewSummary();
-      renderModalReviews();
-
-      document.getElementById("reviewRedirectBtn").onclick = () => {
-        window.location.href = `review.html?restaurant=${encodeURIComponent(winner.Restaurant)}`;
-      };
-
-      document.getElementById("winnerModal").style.display = "flex";
-    }
-
-    function processReviewSummary() {
-      const count = currentWinnerReviews.length;
-      document.getElementById("reviewCountTag").innerText = `(${count} review${count === 1 ? '' : 's'})`;
-
-      if (count === 0) {
-        document.getElementById("avgRatingDisplay").innerText = "No Ratings";
-        document.getElementById("topDishesDisplay").innerText = "";
-        return;
-      }
-
-      // Calculate Average Rating
-      const totalRating = currentWinnerReviews.reduce((sum, r) => sum + (parseFloat(r.Rating) || 0), 0);
-      const avg = (totalRating / count).toFixed(1);
-      document.getElementById("avgRatingDisplay").innerText = `★ ${avg} / 5`;
-
-      // Extract & Count Recommended Dishes
-      const dishCounts = {};
-      currentWinnerReviews.forEach(r => {
-        const dishStr = r.RecommendedDish || r.RecommendedDishes || '';
-        if (dishStr) {
-          dishStr.split(',').forEach(d => {
-            const clean = d.trim();
-            if (clean) dishCounts[clean] = (dishCounts[clean] || 0) + 1;
-          });
-        }
-      });
-
-      const topDishes = Object.keys(dishCounts).sort((a,b) => dishCounts[b] - dishCounts[a]).slice(0, 3);
-      if (topDishes.length > 0) {
-        document.getElementById("topDishesDisplay").innerHTML = `<b>Must Try:</b> ${topDishes.join(', ')}`;
+      // Set Remark
+      const remarkContainer = document.getElementById('resRemarkContainer');
+      const remarkEl = document.getElementById('resRemark');
+      if (currentWinner.remark && currentWinner.remark.trim() !== '') {
+        remarkEl.innerText = currentWinner.remark;
+        remarkContainer.style.display = 'block';
       } else {
-        document.getElementById("topDishesDisplay").innerText = "";
-      }
-    }
-
-    function renderModalReviews() {
-      const listContainer = document.getElementById("modalReviewsList");
-      if (currentWinnerReviews.length === 0) {
-        listContainer.innerHTML = `<div style="color:#94a3b8; text-align:center; padding:8px;">No reviews yet. Be the first to leave one!</div>`;
-        return;
+        remarkContainer.style.display = 'none';
       }
 
-      const sortMode = document.getElementById("reviewSortSelect").value;
-      const sorted = [...currentWinnerReviews].sort((a, b) => {
-        const rA = parseFloat(a.Rating) || 0;
-        const rB = parseFloat(b.Rating) || 0;
-        if (sortMode === 'highest') return rB - rA;
-        if (sortMode === 'lowest') return rA - rB;
-        return 0; // default order (newest/sheet order)
+      // Review Link
+      document.getElementById('resReviewLink').href = `review.html?restaurant=${encodeURIComponent(currentWinner.name)}`;
+
+      // Filter matches from reviews
+      const matches = allReviews.filter(r => {
+        const rName = getProp(r, ['restaurant', 'name', 'place']);
+        return rName.trim().toLowerCase() === currentWinner.name.trim().toLowerCase();
       });
 
-      listContainer.innerHTML = sorted.map(r => `
-        <div class="modal-review-item">
-          <div style="display:flex; justify-content:space-between; color:#f59e0b; font-weight:bold;">
-            <span>${'★'.repeat(parseInt(r.Rating) || 0)}</span>
-            <span style="font-size:10px; color:#64748b;">${r.Timestamp || ''}</span>
-          </div>
-          ${r.RecommendedDish || r.RecommendedDishes ? `<div style="color:#38bdf8; font-size:11px; margin-top:2px;">👍 ${r.RecommendedDish || r.RecommendedDishes}</div>` : ''}
-          ${r.ReviewText || r.Review ? `<div style="color:#cbd5e1; margin-top:4px;">"${r.ReviewText || r.Review}"</div>` : ''}
-        </div>
-      `).join("");
+      const listEl = document.getElementById('resReviewsList');
+      const avgEl = document.getElementById('resAvgRating');
+
+      if (matches.length === 0) {
+        avgEl.innerText = "No Ratings";
+        listEl.innerHTML = "No reviews yet. Be the first to leave one!";
+      } else {
+        let totalStars = 0;
+        let count = 0;
+
+        const html = matches.map(r => {
+          const rating = parseInt(getProp(r, ['rating', 'stars', 'score'])) || 0;
+          if (rating > 0) { totalStars += rating; count++; }
+          const dish = getProp(r, ['recommendeddishes', 'recommendeddish', 'dishes', 'dish']);
+          const comment = getProp(r, ['reviewtext', 'review', 'details', 'comments', 'comment']);
+
+          return `
+            <div class="review-item">
+              <div class="review-stars">${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}</div>
+              ${dish ? `<div style="color:#38bdf8; font-weight:600;">🍲 ${dish}</div>` : ''}
+              ${comment ? `<div style="color:#cbd5e1;">"${comment}"</div>` : ''}
+            </div>
+          `;
+        }).join('');
+
+        avgEl.innerText = count > 0 ? `★ ${(totalStars / count).toFixed(1)} (${matches.length})` : `${matches.length} Review(s)`;
+        listEl.innerHTML = html;
+      }
+
+      document.getElementById('resultModal').style.display = 'flex';
     }
 
     function closeModal() {
-      document.getElementById("winnerModal").style.display = "none";
+      document.getElementById('resultModal').style.display = 'none';
+      document.getElementById('spinBtn').disabled = false;
     }
 
-    initData();
+    init();
   </script>
 </body>
 </html>
