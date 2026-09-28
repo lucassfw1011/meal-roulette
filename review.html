@@ -136,7 +136,7 @@
     const SHEET_ID = '1U2cY66OYCC7xnrvJ65nCOFcOWyGPkfLYe_-ogoFXaIU';
     const RESTAURANTS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
     
-    // Reviews CSV endpoint using your exact GID
+    // Reviews CSV endpoint using your GID
     const REVIEWS_TAB_GID = '324231370';
     const REVIEWS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${REVIEWS_TAB_GID}`;
 
@@ -186,7 +186,7 @@
         }
       } catch(e) { console.error("Error loading restaurants", e); }
 
-      // 2. Fetch Existing Reviews directly from Google Sheet CSV
+      // 2. Fetch Existing Reviews
       try {
         const res = await fetch(REVIEWS_CSV_URL);
         const text = await res.text();
@@ -274,7 +274,7 @@
         await fetch(APPS_SCRIPT_URL, {
           method: "POST",
           mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload)
         });
 
