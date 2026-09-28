@@ -156,6 +156,16 @@
       result.push(cell.trim()); return result;
     }
 
+    function getProp(obj, possibleKeys) {
+      for (let key in obj) {
+        const cleanKey = key.trim().toLowerCase();
+        for (let pk of possibleKeys) {
+          if (cleanKey === pk.toLowerCase()) return obj[key];
+        }
+      }
+      return '';
+    }
+
     async function initPage() {
       // 1. Fetch Restaurants
       try {
@@ -168,7 +178,6 @@
           const datalist = document.getElementById("restaurantOptions");
           datalist.innerHTML = restaurantList.map(r => `<option value="${r}">`).join("");
 
-          // Check URL query parameters (if redirected from roulette modal)
           const urlParams = new URLSearchParams(window.location.search);
           const preSelected = urlParams.get('restaurant');
           if (preSelected) {
@@ -208,21 +217,26 @@
     function onRestaurantChanged() {
       const selected = document.getElementById("restaurantInput").value.trim();
       const reviewsList = document.getElementById("reviewsList");
+      
       if (!selected) {
         reviewsList.innerHTML = "Select or type a restaurant name to see existing reviews.";
         return;
       }
 
-      const matches = allReviewsCache.filter(r => (r.Restaurant || '').toLowerCase() === selected.toLowerCase());
+      const matches = allReviewsCache.filter(r => {
+        const restName = getProp(r, ['restaurant', 'name', 'place']);
+        return restName.trim().toLowerCase() === selected.toLowerCase();
+      });
+
       if (matches.length === 0) {
         reviewsList.innerHTML = "No reviews yet for this restaurant. Be the first!";
         return;
       }
 
       reviewsList.innerHTML = matches.map(r => {
-        const rating = parseInt(r.Rating) || 0;
-        const dish = r.RecommendedDish || r.RecommendedDishes || '';
-        const reviewText = r.Review || r.ReviewText || '';
+        const rating = parseInt(getProp(r, ['rating', 'stars', 'score'])) || 0;
+        const dish = getProp(r, ['recommendeddishes', 'recommendeddish', 'dishes', 'dish']);
+        const reviewText = getProp(r, ['reviewtext', 'review', 'details', 'comments', 'comment']);
 
         return `
           <div class="review-item">
@@ -267,12 +281,11 @@
         status.style.color = "#4ade80";
         status.innerText = "✅ Thank you! Review submitted successfully.";
 
-        // Cache update
         allReviewsCache.push({ 
           Restaurant: restaurant, 
           Rating: selectedRating, 
-          RecommendedDish: dish, 
-          Review: review 
+          RecommendedDishes: dish, 
+          ReviewText: review 
         });
         onRestaurantChanged();
 
