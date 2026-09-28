@@ -61,6 +61,39 @@
     }
     input:focus, textarea:focus { outline: none; border-color: #38bdf8; }
 
+    /* Custom Searchable Dropdown Wrapper */
+    .dropdown-container {
+      position: relative;
+      width: 100%;
+    }
+    .dropdown-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      max-height: 180px;
+      overflow-y: auto;
+      background: #0f172a;
+      border: 1px solid #38bdf8;
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 10px 15px rgba(0,0,0,0.5);
+    }
+    .dropdown-item {
+      padding: 10px 12px;
+      font-size: 14px;
+      color: #f8fafc;
+      cursor: pointer;
+      border-bottom: 1px solid #1e293b;
+    }
+    .dropdown-item:last-child { border-bottom: none; }
+    .dropdown-item:hover, .dropdown-item.active {
+      background: #1e293b;
+      color: #38bdf8;
+    }
+
     .star-rating {
       display: flex; gap: 8px; font-size: 30px; cursor: pointer; color: #475569; margin-top: 4px;
     }
@@ -93,16 +126,19 @@
     <a href="index.html" class="back-btn">← Back to Meal Roulette</a>
     <h1>✍️ Write a Restaurant Review</h1>
 
-    <!-- Searchable Restaurant Input -->
+    <!-- Searchable & Selectable Restaurant Input -->
     <label for="restaurantInput">Type or Select a Restaurant:</label>
-    <input 
-      list="restaurantOptions" 
-      id="restaurantInput" 
-      placeholder="Type restaurant name or choose..." 
-      oninput="onRestaurantChanged()"
-      autocomplete="off"
-    />
-    <datalist id="restaurantOptions"></datalist>
+    <div class="dropdown-container">
+      <input 
+        type="text" 
+        id="restaurantInput" 
+        placeholder="Type to search or select restaurant..." 
+        onfocus="filterDropdownOptions()"
+        oninput="filterDropdownOptions()"
+        autocomplete="off"
+      />
+      <div id="dropdownList" class="dropdown-list"></div>
+    </div>
 
     <!-- Rating -->
     <label>Rating (1 - 5 Stars):</label>
@@ -144,6 +180,7 @@
 
     let selectedRating = 0;
     let allReviewsCache = [];
+    let allRestaurantsCache = [];
 
     function parseCSVLine(text) {
       const result = []; let cell = ''; let inQuotes = false;
@@ -166,6 +203,41 @@
       return '';
     }
 
+    // Dynamic Filter & Search for Dropdown List
+    function filterDropdownOptions() {
+      const query = document.getElementById("restaurantInput").value.trim().toLowerCase();
+      const listEl = document.getElementById("dropdownList");
+
+      const filtered = allRestaurantsCache.filter(r => r.toLowerCase().includes(query));
+
+      if (filtered.length === 0) {
+        listEl.style.display = "none";
+        onRestaurantChanged();
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(r => `
+        <div class="dropdown-item" onclick="selectRestaurant('${r.replace(/'/g, "\\'")}')">${r}</div>
+      `).join("");
+
+      listEl.style.display = "block";
+      onRestaurantChanged();
+    }
+
+    function selectRestaurant(name) {
+      document.getElementById("restaurantInput").value = name;
+      document.getElementById("dropdownList").style.display = "none";
+      onRestaurantChanged();
+    }
+
+    // Hide dropdown if user clicks anywhere outside
+    document.addEventListener("click", function(e) {
+      const container = document.querySelector(".dropdown-container");
+      if (!container.contains(e.target)) {
+        document.getElementById("dropdownList").style.display = "none";
+      }
+    });
+
     async function initPage() {
       // 1. Fetch Restaurants
       try {
@@ -173,10 +245,7 @@
         const csvText = await response.text();
         const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
         if (lines.length > 1) {
-          const restaurantList = lines.slice(1).map(l => parseCSVLine(l)[0]).filter(Boolean).sort();
-          
-          const datalist = document.getElementById("restaurantOptions");
-          datalist.innerHTML = restaurantList.map(r => `<option value="${r}">`).join("");
+          allRestaurantsCache = lines.slice(1).map(l => parseCSVLine(l)[0]).filter(Boolean).sort();
 
           const urlParams = new URLSearchParams(window.location.search);
           const preSelected = urlParams.get('restaurant');
@@ -268,7 +337,6 @@
       status.style.color = "#38bdf8";
       status.innerText = "Submitting review...";
 
-      // Encode params directly into URL string (bypasses browser CORS blocks entirely)
       const queryParams = new URLSearchParams({
         restaurant: restaurant,
         rating: selectedRating,
@@ -287,7 +355,6 @@
         status.style.color = "#4ade80";
         status.innerText = "✅ Thank you! Review submitted successfully.";
 
-        // Append to local cache and refresh UI
         allReviewsCache.push({ 
           Restaurant: restaurant, 
           Rating: selectedRating, 
