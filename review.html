@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Review & Search Restaurants</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #0f172a;
+      color: #ffffff;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .container {
+      width: 100%;
+      max-width: 480px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    .back-link {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 13px;
+      display: inline-block;
+      margin-bottom: 16px;
+    }
+    .back-link:hover { color: #f59e0b; }
+    h1 { font-size: 20px; margin-top: 0; color: #f59e0b; }
+    
+    label { font-size: 13px; color: #94a3b8; display: block; margin-top: 14px; margin-bottom: 6px; }
+    
+    select, input, textarea {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: #f8fafc;
+      padding: 10px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    select:focus, input:focus, textarea:focus { outline: none; border-color: #38bdf8; }
+
+    .star-rating {
+      display: flex; gap: 8px; font-size: 30px; cursor: pointer; color: #475569; margin-top: 4px;
+    }
+    .star-rating .star.active { color: #f59e0b; }
+
+    .submit-btn {
+      width: 100%; padding: 12px; background: #38bdf8; color: #0f172a;
+      font-weight: 700; border: none; border-radius: 6px; cursor: pointer;
+      font-size: 15px; margin-top: 20px; transition: background 0.2s;
+    }
+    .submit-btn:hover { background: #0284c7; color: #fff; }
+    #status { font-size: 13px; margin-top: 10px; text-align: center; }
+
+    .existing-reviews {
+      margin-top: 24px; border-top: 1px solid #334155; padding-top: 16px;
+    }
+    .review-item {
+      background: #0f172a; border-radius: 6px; padding: 10px; margin-bottom: 10px; font-size: 13px;
+    }
+    .review-stars { color: #f59e0b; font-weight: bold; }
+    .dish-tag {
+      display: inline-block; background: #334155; color: #38bdf8;
+      padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="index.html" class="back-link">← Back to Meal Roulette</a>
+    <h1>✍️ Write a Restaurant Review</h1>
+
+    <!-- Restaurant Selector / Search -->
+    <label for="restaurantSelect">Select Restaurant:</label>
+    <select id="restaurantSelect" onchange="onRestaurantChanged()">
+      <option value="">-- Loading restaurants... --</option>
+    </select>
+
+    <!-- Rating -->
+    <label>Rating (1 - 5 Stars):</label>
+    <div class="star-rating" id="starRating">
+      <span class="star" data-value="1">★</span>
+      <span class="star" data-value="2">★</span>
+      <span class="star" data-value="3">★</span>
+      <span class="star" data-value="4">★</span>
+      <span class="star" data-value="5">★</span>
+    </div>
+
+    <!-- Dish Recommendation -->
+    <label for="dishInput">Recommended Dish(es):</label>
+    <input type="text" id="dishInput" placeholder="e.g. Char Kway Teow, Nasi Lemak" />
+
+    <!-- Optional Review -->
+    <label for="reviewInput">Details / Comments (Optional):</label>
+    <textarea id="reviewInput" rows="3" placeholder="How was the food, wait time, atmosphere?"></textarea>
+
+    <button class="submit-btn" onclick="submitReview()">Submit Review</button>
+    <div id="status"></div>
+
+    <!-- Live Community Feedback for Selected Place -->
+    <div class="existing-reviews">
+      <h3 style="font-size: 15px; margin-top: 0; color: #38bdf8;">💬 Existing Reviews</h3>
+      <div id="reviewsList" style="color: #94a3b8; font-size: 13px;">Select a restaurant to see reviews.</div>
+    </div>
+  </div>
+
+  <script>
+    const SHEET_ID = '1U2cY66OYCC7xnrvJ65nCOFcOWyGPkfLYe_-ogoFXaIU';
+    const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQDp75IsVpocDgm-tdLiSTVl_6Shm6vUrgvbvcUCW15yHCUN0BGzK1MHZuKF-n1gCkiw/exec';
+
+    let selectedRating = 0;
+    let allReviewsCache = [];
+
+    function parseCSVLine(text) {
+      const result = []; let cell = ''; let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (c === '"') inQuotes = !inQuotes;
+        else if (c === ',' && !inQuotes) { result.push(cell.trim()); cell = ''; }
+        else cell += c;
+      }
+      result.push(cell.trim()); return result;
+    }
+
+    async function initPage() {
+      // 1. Fetch Restaurants
+      try {
+        const response = await fetch(CSV_URL);
+        const csvText = await response.text();
+        const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
+        if (lines.length > 1) {
+          const headers = parseCSVLine(lines[0]);
+          const restaurantList = lines.slice(1).map(l => parseCSVLine(l)[0]).filter(Boolean).sort();
+          
+          const select = document.getElementById("restaurantSelect");
+          select.innerHTML = '<option value="">-- Select a Restaurant --</option>' + 
+            restaurantList.map(r => `<option value="${r}">${r}</option>`).join("");
+
+          // Check URL query parameters (if redirected from roulette modal)
+          const urlParams = new URLSearchParams(window.location.search);
+          const preSelected = urlParams.get('restaurant');
+          if (preSelected) {
+            select.value = preSelected;
+          }
+        }
+      } catch(e) { console.error("Error loading restaurants", e); }
+
+      // 2. Fetch Existing Reviews
+      try {
+        const res = await fetch(APPS_SCRIPT_URL);
+        if (res.ok) {
+          allReviewsCache = await res.json();
+          onRestaurantChanged();
+        }
+      } catch(e) {}
+    }
+
+    // Star Click Handling
+    document.querySelectorAll('.star-rating .star').forEach(star => {
+      star.addEventListener('click', function() {
+        selectedRating = parseInt(this.getAttribute('data-value'));
+        document.querySelectorAll('.star-rating .star').forEach(s => {
+          s.classList.toggle('active', parseInt(s.getAttribute('data-value')) <= selectedRating);
+        });
+      });
+    });
+
+    function onRestaurantChanged() {
+      const selected = document.getElementById("restaurantSelect").value;
+      const reviewsList = document.getElementById("reviewsList");
+      if (!selected) {
+        reviewsList.innerHTML = "Select a restaurant to see reviews.";
+        return;
+      }
+
+      const matches = allReviewsCache.filter(r => r.Restaurant === selected);
+      if (matches.length === 0) {
+        reviewsList.innerHTML = "No reviews yet for this restaurant. Be the first!";
+        return;
+      }
+
+      reviewsList.innerHTML = matches.map(r => `
+        <div class="review-item">
+          <div class="review-stars">${'★'.repeat(r.Rating || 0)}${'☆'.repeat(5 - (r.Rating || 0))}</div>
+          ${r.RecommendedDishes ? `<div><span class="dish-tag">🍲 ${r.RecommendedDishes}</span></div>` : ''}
+          ${r.ReviewText ? `<div style="margin-top: 6px; color: #cbd5e1;">"${r.ReviewText}"</div>` : ''}
+        </div>
+      `).join("");
+    }
+
+    async function submitReview() {
+      const restaurant = document.getElementById("restaurantSelect").value;
+      const dish = document.getElementById("dishInput").value.trim();
+      const review = document.getElementById("reviewInput").value.trim();
+      const status = document.getElementById("status");
+
+      if (!restaurant) {
+        status.style.color = "#f87171";
+        status.innerText = "Please select a restaurant!";
+        return;
+      }
+      if (selectedRating === 0 && !dish && !review) {
+        status.style.color = "#f87171";
+        status.innerText = "Please provide a star rating, dish, or comment!";
+        return;
+      }
+
+      status.style.color = "#38bdf8";
+      status.innerText = "Submitting review...";
+
+      const payload = { restaurant, rating: selectedRating, dishes: dish, review };
+
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        status.style.color = "#4ade80";
+        status.innerText = "✅ Thank you! Review submitted successfully.";
+
+        // Cache update
+        allReviewsCache.push({ Restaurant: restaurant, Rating: selectedRating, RecommendedDishes: dish, ReviewText: review });
+        onRestaurantChanged();
+
+        // Reset Inputs
+        selectedRating = 0;
+        document.querySelectorAll('.star-rating .star').forEach(s => s.classList.remove('active'));
+        document.getElementById("dishInput").value = "";
+        document.getElementById("reviewInput").value = "";
+
+      } catch (err) {
+        status.style.color = "#f87171";
+        status.innerText = "Error submitting review. Please try again.";
+      }
+    }
+
+    initPage();
+  </script>
+</body>
+</html>
