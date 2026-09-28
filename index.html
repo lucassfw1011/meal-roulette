@@ -306,6 +306,15 @@
       return result;
     }
 
+    // Strips redundant restaurant words for cleaner display on the wheel
+    function cleanWheelName(name) {
+      if (!name) return "";
+      return name
+        .replace(/\b(restaurant|restoran|kitchen|kitchens|kopitiam|cafe|cafe'|café|centre|center|food court|house|bbq|grill|hawker)\b/gi, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
     async function loadMealsFromSheet() {
       try {
         const response = await fetch(CSV_URL);
@@ -438,11 +447,9 @@
       });
     }
 
-    // Smart Multi-line Wrapper Helper for English & Chinese
     function splitTextToLines(text, maxChars = 10) {
       if (!text) return [];
       
-      // Spaced English text
       if (text.includes(' ')) {
         const words = text.split(' ');
         let lines = [];
@@ -459,7 +466,6 @@
         return lines;
       }
 
-      // Chinese / continuous string without spaces
       let lines = [];
       for (let i = 0; i < text.length; i += maxChars) {
         lines.push(text.substring(i, i + maxChars));
@@ -474,9 +480,7 @@
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (numSlices === 0) {
-        return;
-      }
+      if (numSlices === 0) return;
 
       const sliceAngle = (2 * Math.PI) / numSlices;
       const radius = canvas.width / 2;
@@ -485,18 +489,18 @@
 
       const nameHeader = headers[0];
 
-      // Dynamic Font Calculation & Max Line Characters
-      let fontSize = 18;
+      // Dynamic Font & Character Limit Adjustment
+      let fontSize = 16;
       let maxChars = 10;
 
-      if (numSlices > 30) {
-        fontSize = 11;
+      if (numSlices > 35) {
+        fontSize = 10;
         maxChars = 6;
-      } else if (numSlices > 20) {
-        fontSize = 13;
+      } else if (numSlices > 25) {
+        fontSize = 12;
         maxChars = 8;
-      } else if (numSlices > 12) {
-        fontSize = 15;
+      } else if (numSlices > 15) {
+        fontSize = 14;
         maxChars = 9;
       }
 
@@ -510,41 +514,41 @@
         ctx.arc(0, 0, radius, startAngle, endAngle);
         ctx.fillStyle = colors[i % colors.length];
         ctx.fill();
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1.5;
         ctx.strokeStyle = "#0f172a";
         ctx.stroke();
 
-        // Draw Text
+        // Draw Text (with cleaned name)
         ctx.save();
         ctx.rotate(startAngle + sliceAngle / 2);
         ctx.textAlign = "right";
         ctx.fillStyle = "#0f172a";
-        ctx.font = `500 ${fontSize}px system-ui, -apple-system, sans-serif`;
+        ctx.font = `600 ${fontSize}px system-ui, -apple-system, sans-serif`;
 
-        let rawText = meal[nameHeader] || '';
-        let lines = splitTextToLines(rawText, maxChars);
+        let originalName = meal[nameHeader] || '';
+        let cleanedName = cleanWheelName(originalName) || originalName;
+        let lines = splitTextToLines(cleanedName, maxChars);
 
-        const lineHeight = fontSize + 3;
+        const lineHeight = fontSize + 2;
         const startY = -((lines.length - 1) * lineHeight) / 2;
 
         lines.forEach((line, lineIdx) => {
-          ctx.fillText(line, radius - 25, startY + (lineIdx * lineHeight) + (fontSize / 3));
+          ctx.fillText(line, radius - 20, startY + (lineIdx * lineHeight) + (fontSize / 3));
         });
 
         ctx.restore();
       });
 
-      // Center Hub Circle (Covers line convergence at center)
+      // Center Cap
       ctx.beginPath();
-      ctx.arc(0, 0, 45, 0, 2 * Math.PI);
+      ctx.arc(0, 0, 40, 0, 2 * Math.PI);
       ctx.fillStyle = "#1e293b";
       ctx.fill();
-      ctx.lineWidth = 4;
+      ctx.lineWidth = 3;
       ctx.strokeStyle = "#f59e0b";
       ctx.stroke();
 
-      // Hub Emoji Icon
-      ctx.font = "26px system-ui";
+      ctx.font = "24px system-ui";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("🎰", 0, 0);
