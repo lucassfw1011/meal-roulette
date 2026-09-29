@@ -9,6 +9,90 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
+    /* --- GIF MODAL POPUP STYLES --- */
+    .gif-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .gif-modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .gif-modal-card {
+      position: relative;
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 16px;
+      max-width: 90vw;
+      max-height: 85vh;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .gif-modal-overlay.active .gif-modal-card {
+      transform: scale(1);
+    }
+
+    .gif-modal-close {
+      position: absolute;
+      top: -12px;
+      right: -12px;
+      width: 32px;
+      height: 32px;
+      background: #ef4444;
+      color: #ffffff;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease, background-color 0.2s ease;
+      z-index: 10;
+    }
+
+    .gif-modal-close:hover {
+      background: #dc2626;
+      transform: scale(1.1);
+    }
+
+    .gif-modal-img {
+      max-width: 100%;
+      max-height: 70vh;
+      border-radius: 8px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .gif-loading-spinner {
+      color: #38bdf8;
+      font-size: 14px;
+      padding: 20px;
+      font-family: sans-serif;
+    }
+
     * { box-sizing: border-box; }
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -63,13 +147,11 @@
       opacity: 0.25;
     }
 
-    /* Stretched Full Screen */
     .pixel-bg-layer.bg-cover {
       background-repeat: no-repeat;
       background-size: cover;
     }
 
-    /* Tiled / Duplicated Grid Pattern */
     .pixel-bg-layer.bg-repeat {
       background-repeat: repeat;
       background-size: auto;
@@ -123,7 +205,7 @@
     }
 
     .pixel-asset {
-      image-rendering: pixelated; /* Keeps pixel art crisp */
+      image-rendering: pixelated;
       filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
       opacity: 0.85;
       transition: transform 0.3s ease;
@@ -132,12 +214,10 @@
     .anim-bounce { animation: pixelBounce infinite ease-in-out; }
     .anim-sway { animation: pixelSway infinite ease-in-out; }
 
-    /* Hide side assets on very narrow screens to keep center UI clean */
     @media (max-width: 600px) {
       .pixel-sidebar, .pixel-top-bar, .pixel-bottom-bar { display: none; }
     }
 
-    /* Main Content Wrapper */
     .main-content {
       position: relative;
       z-index: 1;
@@ -147,7 +227,6 @@
       width: 100%;
     }
 
-    /* Top Link Button */
     .top-link-btn {
       display: inline-block;
       width: 100%;
@@ -170,7 +249,6 @@
       border-color: #38bdf8;
     }
 
-    /* Filters Card Container */
     .filters-card {
       width: 100%;
       max-width: 480px;
@@ -182,7 +260,6 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     }
 
-    /* Dropdowns Grid (2x2) */
     .filter-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -206,7 +283,6 @@
       width: 100%;
     }
 
-    /* Meal Session Section */
     .meal-section-title {
       text-align: center;
       font-size: 12px;
@@ -249,7 +325,6 @@
       font-weight: 700;
     }
 
-    /* Clear All Filters Button */
     .clear-btn-container {
       display: flex;
       justify-content: flex-end;
@@ -267,7 +342,6 @@
     }
     .clear-btn:hover { background: rgba(239, 68, 68, 0.1); }
 
-    /* Wheel Container */
     .wheel-container {
       position: relative;
       width: 320px;
@@ -309,7 +383,6 @@
     .spin-btn:hover { background: #0284c7; color: #fff; transform: translateY(-2px); }
     .spin-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-    /* Result Modal Window */
     .modal {
       display: none;
       position: fixed;
@@ -402,7 +475,7 @@
 <body>
 
   <!-- Secret Hidden Button -->
-  <button class="secret-gif-btn" onclick="openGifsTab()" title="GIFs of the Day">✨</button>
+  <button class="secret-gif-btn" onclick="showGifPopup()" title="GIF of the Day">👾</button>
 
   <!-- Full Background Layer -->
   <div id="pixelBg" class="pixel-bg-layer"></div>
@@ -511,55 +584,107 @@
     </div>
   </div>
 
+  <!-- GIF Modal Popup -->
+  <div id="gifModal" class="gif-modal-overlay" onclick="closeGifModal(event)">
+    <div class="gif-modal-card" onclick="event.stopPropagation()">
+      <button class="gif-modal-close" onclick="closeGifModal()">&times;</button>
+      <div id="gifLoading" class="gif-loading-spinner">Loading GIF... 🤖</div>
+      <img id="gifImage" class="gif-modal-img" src="" alt="GIF of the Day" />
+    </div>
+  </div>
+
   <script>
+    // Configuration Variables
     const SHEET_ID = '1U2cY66OYCC7xnrvJ65nCOFcOWyGPkfLYe_-ogoFXaIU';
-    
-    // REPLACE 'YOUR_GIFS_TAB_GID' with the actual GID from your Google Sheet URL (e.g. '0' or '123456789')
-    const GIFS_TAB_GID = 'YOUR_GIFS_TAB_GID'; 
+    const GIFS_TAB_GID = '579711071';
+    const RESTAURANTS_TAB_GID = '0'; // Replace with actual GID if different
+    const REVIEWS_TAB_GID = '0';     // Replace with actual GID if different
+    const PIXEL_ASSETS_TAB_GID = 'YOUR_PIXEL_ASSETS_TAB_GID_HERE'; 
 
-    function openGifsTab() {
-      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit#gid=${GIFS_TAB_GID}`;
-      window.open(url, '_blank');
-    }
-
-    const RESTAURANTS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
-    const REVIEWS_TAB_GID = '324231370';
+    const GIFS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GIFS_TAB_GID}`;
+    const RESTAURANTS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${RESTAURANTS_TAB_GID}`;
     const REVIEWS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${REVIEWS_TAB_GID}`;
-
-    const PIXEL_ASSETS_TAB_GID = '642604358';
     const PIXEL_ASSETS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${PIXEL_ASSETS_TAB_GID}`;
 
+    // State Variables
     let allRestaurants = [];
     let filteredRestaurants = [];
     let allReviews = [];
-
-    let activeMealSession = 'AllDay';
-    let isSpinning = false;
     let currentAngle = 0;
+    let isSpinning = false;
     let currentWinner = null;
+    let activeMealSession = 'AllDay';
 
-    const COLORS = ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899'];
+    const COLORS = [
+      '#f43f5e', '#8b5cf6', '#06b6d4', '#10b981', 
+      '#f59e0b', '#ec4899', '#3b82f6', '#84cc16'
+    ];
 
+    // CSV Parsing Utility
     function parseCSVLine(text) {
-      const result = []; let cell = ''; let inQuotes = false;
-      for (let i = 0; i < text.length; i++) {
-        const c = text[i];
-        if (c === '"') inQuotes = !inQuotes;
-        else if (c === ',' && !inQuotes) { result.push(cell.trim()); cell = ''; }
-        else cell += c;
+      const regex = /(?:,|\n|^)("(?:(?:"")*[^"]*)*"|[^",\n]*)/g;
+      const matches = [];
+      let match;
+      while ((match = regex.exec(text)) !== null) {
+        let val = match[1];
+        if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1).replace(/""/g, '"');
+        matches.push(val.trim());
       }
-      result.push(cell.trim()); return result;
+      return matches;
     }
 
-    function getProp(obj, possibleKeys) {
-      for (let key in obj) {
-        const cleanKey = key.trim().toLowerCase();
-        for (let pk of possibleKeys) {
-          if (cleanKey === pk.toLowerCase()) return obj[key];
-        }
+    // Dynamic Object Property Lookup Utility
+    function getProp(obj, keys) {
+      for (const k of Object.keys(obj)) {
+        const cleanK = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (keys.includes(cleanK)) return obj[k];
       }
       return '';
     }
+
+    async function showGifPopup() {
+      const modal = document.getElementById('gifModal');
+      const img = document.getElementById('gifImage');
+      const spinner = document.getElementById('gifLoading');
+
+      modal.classList.add('active');
+      spinner.style.display = 'block';
+      spinner.textContent = 'Loading GIF... ✨';
+      img.style.display = 'none';
+
+      try {
+        const response = await fetch(GIFS_CSV_URL);
+        const csvText = await response.text();
+        const rows = csvText.split('\n').map(row => row.split(','));
+        let gifUrl = rows[1] ? rows[1][0] : null;
+
+        if (gifUrl) {
+          gifUrl = gifUrl.replace(/["'\r\n]/g, '').trim();
+          img.src = gifUrl;
+          img.onload = () => {
+            spinner.style.display = 'none';
+            img.style.display = 'block';
+          };
+          img.onerror = () => {
+            spinner.textContent = 'Failed to load GIF image from URL.';
+          };
+        } else {
+          spinner.textContent = 'No GIF URL found in cell A2.';
+        }
+      } catch (err) {
+        console.error('Error fetching GIF:', err);
+        spinner.textContent = 'Error fetching spreadsheet data.';
+      }
+    }
+
+    function closeGifModal(event) {
+      const modal = document.getElementById('gifModal');
+      modal.classList.remove('active');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeGifModal();
+    });
 
     async function init() {
       // 1. Fetch Restaurants
@@ -616,7 +741,7 @@
         }
       } catch(e) { console.error("Error loading reviews", e); }
 
-      // 3. Fetch & Render Dynamic Pixel Assets
+      // 3. Fetch Pixel Assets
       loadPixelAssets();
     }
 
@@ -641,7 +766,7 @@
         if (bottomBox) bottomBox.innerHTML = '';
         if (bgBox) { 
           bgBox.style.backgroundImage = 'none'; 
-          bgBox.className = 'pixel-bg-layer'; // Reset classes
+          bgBox.className = 'pixel-bg-layer';
         }
 
         lines.slice(1).forEach(line => {
@@ -654,7 +779,6 @@
 
           if (!url || !url.startsWith('http')) return;
 
-          // Full Background Handling
           if (side.includes('bg') || side.includes('background')) {
             if (bgBox) {
               bgBox.style.backgroundImage = `url('${url}')`;
@@ -667,7 +791,6 @@
             return;
           }
 
-          // Floating Assets (Left, Right, Top, Bottom)
           const img = document.createElement('img');
           img.src = url;
           img.className = `pixel-asset anim-${animation}`;
