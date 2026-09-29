@@ -24,29 +24,57 @@
       overflow-x: hidden;
     }
 
+    /* Secret GIF Button Styling */
+    .secret-gif-btn {
+      position: fixed;
+      bottom: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      color: #64748b;
+      font-size: 12px;
+      cursor: pointer;
+      z-index: 99;
+      transition: all 0.3s ease;
+      opacity: 0.3;
+    }
+
+    .secret-gif-btn:hover {
+      opacity: 1;
+      background: rgba(56, 189, 248, 0.2);
+      border-color: #38bdf8;
+      color: #38bdf8;
+      transform: scale(1.15) rotate(15deg);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+    }
+
     /* Full Background Layer Base */
-.pixel-bg-layer {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: -1;
-  pointer-events: none;
-  background-position: center;
-  opacity: 0.25;
-}
+    .pixel-bg-layer {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      pointer-events: none;
+      background-position: center;
+      opacity: 0.25;
+    }
 
-/* Stretched Full Screen */
-.pixel-bg-layer.bg-cover {
-  background-repeat: no-repeat;
-  background-size: cover;
-}
+    /* Stretched Full Screen */
+    .pixel-bg-layer.bg-cover {
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
 
-/* Tiled / Duplicated Grid Pattern */
-.pixel-bg-layer.bg-repeat {
-  background-repeat: repeat;
-  background-size: auto;
-}
+    /* Tiled / Duplicated Grid Pattern */
+    .pixel-bg-layer.bg-repeat {
+      background-repeat: repeat;
+      background-size: auto;
+    }
+
     /* Top and Bottom Containers */
     .pixel-top-bar, .pixel-bottom-bar {
       position: fixed;
@@ -373,6 +401,9 @@
 </head>
 <body>
 
+  <!-- Secret Hidden Button -->
+  <button class="secret-gif-btn" onclick="openGifsTab()" title="GIFs of the Day">✨</button>
+
   <!-- Full Background Layer -->
   <div id="pixelBg" class="pixel-bg-layer"></div>
 
@@ -482,6 +513,15 @@
 
   <script>
     const SHEET_ID = '1U2cY66OYCC7xnrvJ65nCOFcOWyGPkfLYe_-ogoFXaIU';
+    
+    // REPLACE 'YOUR_GIFS_TAB_GID' with the actual GID from your Google Sheet URL (e.g. '0' or '123456789')
+    const GIFS_TAB_GID = 'YOUR_GIFS_TAB_GID'; 
+
+    function openGifsTab() {
+      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit#gid=${GIFS_TAB_GID}`;
+      window.open(url, '_blank');
+    }
+
     const RESTAURANTS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
     const REVIEWS_TAB_GID = '324231370';
     const REVIEWS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${REVIEWS_TAB_GID}`;
@@ -580,74 +620,74 @@
       loadPixelAssets();
     }
 
-   async function loadPixelAssets() {
-  if (PIXEL_ASSETS_TAB_GID === 'YOUR_PIXEL_ASSETS_TAB_GID_HERE') return;
+    async function loadPixelAssets() {
+      if (PIXEL_ASSETS_TAB_GID === 'YOUR_PIXEL_ASSETS_TAB_GID_HERE') return;
 
-  try {
-    const res = await fetch(PIXEL_ASSETS_CSV_URL);
-    const text = await res.text();
-    const lines = text.split(/\r?\n/).filter(l => l.trim());
-    if (lines.length <= 1) return;
+      try {
+        const res = await fetch(PIXEL_ASSETS_CSV_URL);
+        const text = await res.text();
+        const lines = text.split(/\r?\n/).filter(l => l.trim());
+        if (lines.length <= 1) return;
 
-    const leftBox = document.getElementById('pixelSidebarLeft');
-    const rightBox = document.getElementById('pixelSidebarRight');
-    const topBox = document.getElementById('pixelTop');
-    const bottomBox = document.getElementById('pixelBottom');
-    const bgBox = document.getElementById('pixelBg');
+        const leftBox = document.getElementById('pixelSidebarLeft');
+        const rightBox = document.getElementById('pixelSidebarRight');
+        const topBox = document.getElementById('pixelTop');
+        const bottomBox = document.getElementById('pixelBottom');
+        const bgBox = document.getElementById('pixelBg');
 
-    if (leftBox) leftBox.innerHTML = '';
-    if (rightBox) rightBox.innerHTML = '';
-    if (topBox) topBox.innerHTML = '';
-    if (bottomBox) bottomBox.innerHTML = '';
-    if (bgBox) { 
-      bgBox.style.backgroundImage = 'none'; 
-      bgBox.className = 'pixel-bg-layer'; // Reset classes
-    }
-
-    lines.slice(1).forEach(line => {
-      const c = parseCSVLine(line);
-      const url = c[0];
-      const side = (c[1] || 'Left').toLowerCase();
-      const animation = (c[2] || 'Float').toLowerCase();
-      const size = c[3] || '80';
-      const speed = c[4] || '6';
-
-      if (!url || !url.startsWith('http')) return;
-
-      // Full Background Handling
-      if (side.includes('bg') || side.includes('background')) {
-        if (bgBox) {
-          bgBox.style.backgroundImage = `url('${url}')`;
-          if (side.includes('repeat') || side.includes('tile') || side.includes('duplicate')) {
-            bgBox.className = 'pixel-bg-layer bg-repeat';
-          } else {
-            bgBox.className = 'pixel-bg-layer bg-cover';
-          }
+        if (leftBox) leftBox.innerHTML = '';
+        if (rightBox) rightBox.innerHTML = '';
+        if (topBox) topBox.innerHTML = '';
+        if (bottomBox) bottomBox.innerHTML = '';
+        if (bgBox) { 
+          bgBox.style.backgroundImage = 'none'; 
+          bgBox.className = 'pixel-bg-layer'; // Reset classes
         }
-        return;
-      }
 
-      // Floating Assets (Left, Right, Top, Bottom)
-      const img = document.createElement('img');
-      img.src = url;
-      img.className = `pixel-asset anim-${animation}`;
-      img.style.width = `${size}px`;
-      img.style.animationDuration = `${speed}s`;
+        lines.slice(1).forEach(line => {
+          const c = parseCSVLine(line);
+          const url = c[0];
+          const side = (c[1] || 'Left').toLowerCase();
+          const animation = (c[2] || 'Float').toLowerCase();
+          const size = c[3] || '80';
+          const speed = c[4] || '6';
 
-      if (side === 'right') {
-        if (rightBox) rightBox.appendChild(img);
-      } else if (side === 'top') {
-        if (topBox) topBox.appendChild(img);
-      } else if (side === 'bottom') {
-        if (bottomBox) bottomBox.appendChild(img);
-      } else {
-        if (leftBox) leftBox.appendChild(img);
+          if (!url || !url.startsWith('http')) return;
+
+          // Full Background Handling
+          if (side.includes('bg') || side.includes('background')) {
+            if (bgBox) {
+              bgBox.style.backgroundImage = `url('${url}')`;
+              if (side.includes('repeat') || side.includes('tile') || side.includes('duplicate')) {
+                bgBox.className = 'pixel-bg-layer bg-repeat';
+              } else {
+                bgBox.className = 'pixel-bg-layer bg-cover';
+              }
+            }
+            return;
+          }
+
+          // Floating Assets (Left, Right, Top, Bottom)
+          const img = document.createElement('img');
+          img.src = url;
+          img.className = `pixel-asset anim-${animation}`;
+          img.style.width = `${size}px`;
+          img.style.animationDuration = `${speed}s`;
+
+          if (side === 'right') {
+            if (rightBox) rightBox.appendChild(img);
+          } else if (side === 'top') {
+            if (topBox) topBox.appendChild(img);
+          } else if (side === 'bottom') {
+            if (bottomBox) bottomBox.appendChild(img);
+          } else {
+            if (leftBox) leftBox.appendChild(img);
+          }
+        });
+      } catch (e) {
+        console.error("Error loading pixel assets from sheet:", e);
       }
-    });
-  } catch (e) {
-    console.error("Error loading pixel assets from sheet:", e);
-  }
-}
+    }
 
     function populateFilterOptions() {
       const categories = [...new Set(allRestaurants.map(r => r.category).filter(Boolean))].sort();
