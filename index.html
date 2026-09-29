@@ -24,19 +24,29 @@
       overflow-x: hidden;
     }
 
-    /* Full Background Layer */
-    .pixel-bg-layer {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: -1;
-      pointer-events: none;
-      background-position: center;
-      background-repeat: repeat;
-      opacity: 0.25;
-    }
+    /* Full Background Layer Base */
+.pixel-bg-layer {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  background-position: center;
+  opacity: 0.25;
+}
 
+/* Stretched Full Screen */
+.pixel-bg-layer.bg-cover {
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* Tiled / Duplicated Grid Pattern */
+.pixel-bg-layer.bg-repeat {
+  background-repeat: repeat;
+  background-size: auto;
+}
     /* Top and Bottom Containers */
     .pixel-top-bar, .pixel-bottom-bar {
       position: fixed;
@@ -570,66 +580,74 @@
       loadPixelAssets();
     }
 
-    async function loadPixelAssets() {
-      if (PIXEL_ASSETS_TAB_GID === 'YOUR_PIXEL_ASSETS_TAB_GID_HERE') return;
+   async function loadPixelAssets() {
+  if (PIXEL_ASSETS_TAB_GID === 'YOUR_PIXEL_ASSETS_TAB_GID_HERE') return;
 
-      try {
-        const res = await fetch(PIXEL_ASSETS_CSV_URL);
-        const text = await res.text();
-        const lines = text.split(/\r?\n/).filter(l => l.trim());
-        if (lines.length <= 1) return;
+  try {
+    const res = await fetch(PIXEL_ASSETS_CSV_URL);
+    const text = await res.text();
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length <= 1) return;
 
-        const leftBox = document.getElementById('pixelSidebarLeft');
-        const rightBox = document.getElementById('pixelSidebarRight');
-        const topBox = document.getElementById('pixelTop');
-        const bottomBox = document.getElementById('pixelBottom');
-        const bgBox = document.getElementById('pixelBg');
+    const leftBox = document.getElementById('pixelSidebarLeft');
+    const rightBox = document.getElementById('pixelSidebarRight');
+    const topBox = document.getElementById('pixelTop');
+    const bottomBox = document.getElementById('pixelBottom');
+    const bgBox = document.getElementById('pixelBg');
 
-        if (leftBox) leftBox.innerHTML = '';
-        if (rightBox) rightBox.innerHTML = '';
-        if (topBox) topBox.innerHTML = '';
-        if (bottomBox) bottomBox.innerHTML = '';
-        if (bgBox) { bgBox.style.backgroundImage = 'none'; }
-
-        lines.slice(1).forEach(line => {
-          const c = parseCSVLine(line);
-          const url = c[0];
-          const side = (c[1] || 'Left').toLowerCase();
-          const animation = (c[2] || 'Float').toLowerCase();
-          const size = c[3] || '80';
-          const speed = c[4] || '6';
-
-          if (!url || !url.startsWith('http')) return;
-
-          // Full Background Mode
-          if (side === 'background' || side === 'bg') {
-            if (bgBox) {
-              bgBox.style.backgroundImage = `url('${url}')`;
-            }
-            return;
-          }
-
-          // Floating Asset Mode (Left, Right, Top, Bottom)
-          const img = document.createElement('img');
-          img.src = url;
-          img.className = `pixel-asset anim-${animation}`;
-          img.style.width = `${size}px`;
-          img.style.animationDuration = `${speed}s`;
-
-          if (side === 'right') {
-            if (rightBox) rightBox.appendChild(img);
-          } else if (side === 'top') {
-            if (topBox) topBox.appendChild(img);
-          } else if (side === 'bottom') {
-            if (bottomBox) bottomBox.appendChild(img);
-          } else {
-            if (leftBox) leftBox.appendChild(img);
-          }
-        });
-      } catch (e) {
-        console.error("Error loading pixel assets from sheet:", e);
-      }
+    if (leftBox) leftBox.innerHTML = '';
+    if (rightBox) rightBox.innerHTML = '';
+    if (topBox) topBox.innerHTML = '';
+    if (bottomBox) bottomBox.innerHTML = '';
+    if (bgBox) { 
+      bgBox.style.backgroundImage = 'none'; 
+      bgBox.className = 'pixel-bg-layer'; // Reset classes
     }
+
+    lines.slice(1).forEach(line => {
+      const c = parseCSVLine(line);
+      const url = c[0];
+      const side = (c[1] || 'Left').toLowerCase();
+      const animation = (c[2] || 'Float').toLowerCase();
+      const size = c[3] || '80';
+      const speed = c[4] || '6';
+
+      if (!url || !url.startsWith('http')) return;
+
+      // Full Background Handling
+      if (side.includes('bg') || side.includes('background')) {
+        if (bgBox) {
+          bgBox.style.backgroundImage = `url('${url}')`;
+          if (side.includes('repeat') || side.includes('tile') || side.includes('duplicate')) {
+            bgBox.className = 'pixel-bg-layer bg-repeat';
+          } else {
+            bgBox.className = 'pixel-bg-layer bg-cover';
+          }
+        }
+        return;
+      }
+
+      // Floating Assets (Left, Right, Top, Bottom)
+      const img = document.createElement('img');
+      img.src = url;
+      img.className = `pixel-asset anim-${animation}`;
+      img.style.width = `${size}px`;
+      img.style.animationDuration = `${speed}s`;
+
+      if (side === 'right') {
+        if (rightBox) rightBox.appendChild(img);
+      } else if (side === 'top') {
+        if (topBox) topBox.appendChild(img);
+      } else if (side === 'bottom') {
+        if (bottomBox) bottomBox.appendChild(img);
+      } else {
+        if (leftBox) leftBox.appendChild(img);
+      }
+    });
+  } catch (e) {
+    console.error("Error loading pixel assets from sheet:", e);
+  }
+}
 
     function populateFilterOptions() {
       const categories = [...new Set(allRestaurants.map(r => r.category).filter(Boolean))].sort();
