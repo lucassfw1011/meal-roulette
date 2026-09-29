@@ -86,28 +86,31 @@
       width: 100%;
     }
 
-    .divider {
-      height: 1px;
-      background-color: #233148;
-      margin: 12px 0 16px 0;
-    }
-
-    /* Meal Session Pills */
+    /* Meal Session Section */
     .meal-section-title {
       text-align: center;
       font-size: 12px;
       color: #94a3b8;
       font-weight: 600;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       letter-spacing: 0.3px;
     }
-    .meal-pills {
+    
+    /* Layout for Meal Pills: Row 1 (All Day) & Row 2 (Others) */
+    .meal-pills-container {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
       gap: 8px;
       margin-bottom: 16px;
     }
+    .meal-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
     .meal-pill {
       background: #0d1527;
       color: #94a3b8;
@@ -325,16 +328,21 @@
       </div>
     </div>
 
-    <div class="divider"></div>
-
+    <!-- Meal Session Header -->
     <div class="meal-section-title">Meal Session / Business Hour:</div>
-    <div class="meal-pills">
-      <button class="meal-pill active" onclick="selectMealSession('AllDay', this)">All Day</button>
-      <button class="meal-pill" onclick="selectMealSession('Breakfast', this)">Breakfast</button>
-      <button class="meal-pill" onclick="selectMealSession('Lunch', this)">Lunch</button>
-      <button class="meal-pill" onclick="selectMealSession('Teatime', this)">Teatime</button>
-      <button class="meal-pill" onclick="selectMealSession('Dinner', this)">Dinner</button>
-      <button class="meal-pill" onclick="selectMealSession('Supper', this)">Supper</button>
+    
+    <!-- Structured Meal Pills (Row 1: All Day | Row 2: Sessions) -->
+    <div class="meal-pills-container">
+      <div class="meal-row">
+        <button class="meal-pill active" onclick="selectMealSession('AllDay', this)">All Day</button>
+      </div>
+      <div class="meal-row">
+        <button class="meal-pill" onclick="selectMealSession('Breakfast', this)">Breakfast</button>
+        <button class="meal-pill" onclick="selectMealSession('Lunch', this)">Lunch</button>
+        <button class="meal-pill" onclick="selectMealSession('Teatime', this)">Teatime</button>
+        <button class="meal-pill" onclick="selectMealSession('Dinner', this)">Dinner</button>
+        <button class="meal-pill" onclick="selectMealSession('Supper', this)">Supper</button>
+      </div>
     </div>
 
     <div class="clear-btn-container">
