@@ -9,9 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: #0d1322;
@@ -22,6 +20,65 @@
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Side Container Panels for Pixel Assets */
+    .pixel-sidebar {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 18vw;
+      max-width: 200px;
+      pointer-events: none;
+      z-index: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
+      padding: 20px 0;
+    }
+    .pixel-sidebar.left { left: 2vw; }
+    .pixel-sidebar.right { right: 2vw; }
+
+    /* Animation Keyframes */
+    @keyframes pixelFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(3deg); }
+    }
+    @keyframes pixelBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+    @keyframes pixelSway {
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      50% { transform: translateX(10px) rotate(-5deg); }
+    }
+
+    .pixel-asset {
+      image-rendering: pixelated; /* Keeps pixel art crisp */
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+      opacity: 0.85;
+      transition: transform 0.3s ease;
+    }
+    .anim-float { animation: pixelFloat infinite ease-in-out; }
+    .anim-bounce { animation: pixelBounce infinite ease-in-out; }
+    .anim-sway { animation: pixelSway infinite ease-in-out; }
+
+    /* Hide side assets on tablets/mobile screens to keep center clean */
+    @media (max-width: 900px) {
+      .pixel-sidebar { display: none; }
+    }
+
+    /* Main Content Wrapper */
+    .main-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
     }
 
     /* Top Link Button */
@@ -56,6 +113,7 @@
       border-radius: 16px;
       padding: 16px;
       margin-bottom: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     }
 
     /* Dropdowns Grid (2x2) */
@@ -70,11 +128,7 @@
       flex-direction: column;
       gap: 6px;
     }
-    label {
-      font-size: 13px;
-      color: #94a3b8;
-      font-weight: 500;
-    }
+    label { font-size: 13px; color: #94a3b8; font-weight: 500; }
     select {
       background: #0d1527;
       color: #f8fafc;
@@ -96,7 +150,6 @@
       letter-spacing: 0.3px;
     }
     
-    /* Layout for Meal Pills: Row 1 (All Day) & Row 2 (Others) */
     .meal-pills-container {
       display: flex;
       flex-direction: column;
@@ -146,9 +199,7 @@
       cursor: pointer;
       transition: all 0.2s ease;
     }
-    .clear-btn:hover {
-      background: rgba(239, 68, 68, 0.1);
-    }
+    .clear-btn:hover { background: rgba(239, 68, 68, 0.1); }
 
     /* Wheel Container */
     .wheel-container {
@@ -161,7 +212,7 @@
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      box-shadow: 0 0 25px rgba(0,0,0,0.6);
     }
     .pointer {
       position: absolute;
@@ -217,7 +268,6 @@
     .modal p { margin: 6px 0; color: #cbd5e1; font-size: 14px; line-height: 1.4; }
     .modal strong { color: #f8fafc; }
 
-    /* Combined Details Badge Box */
     .meta-details {
       background: #0d1527;
       border: 1px solid #233148;
@@ -227,21 +277,10 @@
       font-size: 13px;
       color: #94a3b8;
     }
-    .meta-line {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 4px;
-    }
-    .meta-line:last-child {
-      margin-bottom: 0;
-    }
-    .meta-tag {
-      color: #cbd5e1;
-    }
-    .meta-tag strong {
-      color: #38bdf8;
-    }
+    .meta-line { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 4px; }
+    .meta-line:last-child { margin-bottom: 0; }
+    .meta-tag { color: #cbd5e1; }
+    .meta-tag strong { color: #38bdf8; }
 
     .reviews-box {
       margin-top: 12px;
@@ -296,67 +335,68 @@
 </head>
 <body>
 
-  <!-- Top Write Review / Search Button -->
-  <a href="review.html" class="top-link-btn">✍️ Write a Review / Search Restaurants</a>
+  <!-- Dynamic Side Containers for Pixel Art Assets -->
+  <div id="pixelSidebarLeft" class="pixel-sidebar left"></div>
+  <div id="pixelSidebarRight" class="pixel-sidebar right"></div>
 
-  <!-- Filters Container -->
-  <div class="filters-card">
-    <div class="filter-grid">
-      <div class="filter-group">
-        <label>Category:</label>
-        <select id="filterCategory" onchange="applyFilters()">
-          <option value="ALL">All</option>
-        </select>
+  <div class="main-content">
+    <a href="review.html" class="top-link-btn">✍️ Write a Review / Search Restaurants</a>
+
+    <div class="filters-card">
+      <div class="filter-grid">
+        <div class="filter-group">
+          <label>Category:</label>
+          <select id="filterCategory" onchange="applyFilters()">
+            <option value="ALL">All</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Price:</label>
+          <select id="filterPrice" onchange="applyFilters()">
+            <option value="ALL">All</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Location:</label>
+          <select id="filterLocation" onchange="applyFilters()">
+            <option value="ALL">All</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Off Day:</label>
+          <select id="filterOffDay" onchange="applyFilters()">
+            <option value="ALL">All</option>
+          </select>
+        </div>
       </div>
-      <div class="filter-group">
-        <label>Price:</label>
-        <select id="filterPrice" onchange="applyFilters()">
-          <option value="ALL">All</option>
-        </select>
+
+      <div class="meal-section-title">Meal Session / Business Hour:</div>
+      
+      <div class="meal-pills-container">
+        <div class="meal-row">
+          <button class="meal-pill active" onclick="selectMealSession('AllDay', this)">All Day</button>
+        </div>
+        <div class="meal-row">
+          <button class="meal-pill" onclick="selectMealSession('Breakfast', this)">Breakfast</button>
+          <button class="meal-pill" onclick="selectMealSession('Lunch', this)">Lunch</button>
+          <button class="meal-pill" onclick="selectMealSession('Teatime', this)">Teatime</button>
+          <button class="meal-pill" onclick="selectMealSession('Dinner', this)">Dinner</button>
+          <button class="meal-pill" onclick="selectMealSession('Supper', this)">Supper</button>
+        </div>
       </div>
-      <div class="filter-group">
-        <label>Location:</label>
-        <select id="filterLocation" onchange="applyFilters()">
-          <option value="ALL">All</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>Off Day:</label>
-        <select id="filterOffDay" onchange="applyFilters()">
-          <option value="ALL">All</option>
-        </select>
+
+      <div class="clear-btn-container">
+        <button class="clear-btn" onclick="clearAllFilters()">Clear All Filters</button>
       </div>
     </div>
 
-    <!-- Meal Session Header -->
-    <div class="meal-section-title">Meal Session / Business Hour:</div>
-    
-    <!-- Structured Meal Pills (Row 1: All Day | Row 2: Sessions) -->
-    <div class="meal-pills-container">
-      <div class="meal-row">
-        <button class="meal-pill active" onclick="selectMealSession('AllDay', this)">All Day</button>
-      </div>
-      <div class="meal-row">
-        <button class="meal-pill" onclick="selectMealSession('Breakfast', this)">Breakfast</button>
-        <button class="meal-pill" onclick="selectMealSession('Lunch', this)">Lunch</button>
-        <button class="meal-pill" onclick="selectMealSession('Teatime', this)">Teatime</button>
-        <button class="meal-pill" onclick="selectMealSession('Dinner', this)">Dinner</button>
-        <button class="meal-pill" onclick="selectMealSession('Supper', this)">Supper</button>
-      </div>
+    <div class="wheel-container">
+      <div class="pointer"></div>
+      <canvas id="wheelCanvas" width="320" height="320"></canvas>
     </div>
 
-    <div class="clear-btn-container">
-      <button class="clear-btn" onclick="clearAllFilters()">Clear All Filters</button>
-    </div>
+    <button id="spinBtn" class="spin-btn" onclick="spinWheel()">SPIN!</button>
   </div>
-
-  <!-- Wheel Canvas -->
-  <div class="wheel-container">
-    <div class="pointer"></div>
-    <canvas id="wheelCanvas" width="320" height="320"></canvas>
-  </div>
-
-  <button id="spinBtn" class="spin-btn" onclick="spinWheel()">SPIN!</button>
 
   <!-- Result Modal Window -->
   <div id="resultModal" class="modal">
@@ -366,7 +406,6 @@
       <p><strong>Category:</strong> <span id="resCategory"></span> | <strong>Price:</strong> <span id="resPrice"></span></p>
       <p><strong>Location:</strong> <span id="resLocation"></span></p>
 
-      <!-- Shop, Off Day, and Remark in 1-2 lines -->
       <div class="meta-details">
         <div class="meta-line">
           <span class="meta-tag"><strong>Shop / Outlet:</strong> <span id="resShop"></span></span>
@@ -377,7 +416,6 @@
         </div>
       </div>
 
-      <!-- Ratings and Reviews Box -->
       <div class="reviews-box">
         <div class="review-header">
           <span style="font-weight: 700; color: #38bdf8; font-size: 13px;">Community Ratings</span>
@@ -389,9 +427,7 @@
       </div>
 
       <div class="modal-actions">
-        <!-- Spin Again Action -->
         <button class="modal-btn btn-spin-again" onclick="closeModalAndSpinAgain()">🔄 Spin Again!</button>
-        
         <button class="modal-btn btn-close" onclick="closeModal()">Close</button>
         <a id="resMapsLink" href="#" target="_blank" class="modal-btn btn-maps">📍 Open Maps</a>
         <a id="resReviewLink" href="#" class="modal-btn btn-review">✍️ Write / View Reviews</a>
@@ -404,6 +440,10 @@
     const RESTAURANTS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
     const REVIEWS_TAB_GID = '324231370';
     const REVIEWS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${REVIEWS_TAB_GID}`;
+
+    // REPLACE THIS WITH YOUR PIXEL_ASSETS TAB GID
+    const PIXEL_ASSETS_TAB_GID = '642604358';
+    const PIXEL_ASSETS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${PIXEL_ASSETS_TAB_GID}`;
 
     let allRestaurants = [];
     let filteredRestaurants = [];
@@ -491,6 +531,50 @@
           });
         }
       } catch(e) { console.error("Error loading reviews", e); }
+
+      // 3. Fetch & Render Dynamic Pixel Assets
+      loadPixelAssets();
+    }
+
+    async function loadPixelAssets() {
+      if (PIXEL_ASSETS_TAB_GID === 'YOUR_PIXEL_ASSETS_TAB_GID_HERE') return;
+
+      try {
+        const res = await fetch(PIXEL_ASSETS_CSV_URL);
+        const text = await res.text();
+        const lines = text.split(/\r?\n/).filter(l => l.trim());
+        if (lines.length <= 1) return;
+
+        const leftBox = document.getElementById('pixelSidebarLeft');
+        const rightBox = document.getElementById('pixelSidebarRight');
+        leftBox.innerHTML = '';
+        rightBox.innerHTML = '';
+
+        lines.slice(1).forEach(line => {
+          const c = parseCSVLine(line);
+          const url = c[0];
+          const side = (c[1] || 'Left').toLowerCase();
+          const animation = (c[2] || 'Float').toLowerCase();
+          const size = c[3] || '80';
+          const speed = c[4] || '6';
+
+          if (!url || !url.startsWith('http')) return;
+
+          const img = document.createElement('img');
+          img.src = url;
+          img.className = `pixel-asset anim-${animation}`;
+          img.style.width = `${size}px`;
+          img.style.animationDuration = `${speed}s`;
+
+          if (side === 'right') {
+            rightBox.appendChild(img);
+          } else {
+            leftBox.appendChild(img);
+          }
+        });
+      } catch (e) {
+        console.error("Error loading pixel assets from sheet:", e);
+      }
     }
 
     function populateFilterOptions() {
@@ -644,7 +728,6 @@
     function showResultModal() {
       if (!currentWinner) return;
 
-      // 1. Fire Confetti
       confetti({
         particleCount: 120,
         spread: 80,
@@ -652,13 +735,11 @@
         zIndex: 2000
       });
 
-      // 2. Populate main info
       document.getElementById('resName').innerText = currentWinner.name;
       document.getElementById('resCategory').innerText = currentWinner.category || '-';
       document.getElementById('resPrice').innerText = currentWinner.price || '-';
       document.getElementById('resLocation').innerText = currentWinner.location || '-';
 
-      // 3. Populate 1-2 line Meta Info (Shop, Off Day, Remark)
       document.getElementById('resShop').innerText = currentWinner.shop && currentWinner.shop !== '' ? currentWinner.shop : '-';
       document.getElementById('resOffDay').innerText = currentWinner.offDay && currentWinner.offDay !== '' ? currentWinner.offDay : 'None';
       
@@ -670,7 +751,6 @@
         remarkRow.style.display = 'none';
       }
 
-      // 4. Set Action Buttons
       const mapsBtn = document.getElementById('resMapsLink');
       if (currentWinner.mapsUrl && currentWinner.mapsUrl.startsWith('http')) {
         mapsBtn.href = currentWinner.mapsUrl;
@@ -681,7 +761,6 @@
 
       document.getElementById('resReviewLink').href = `review.html?restaurant=${encodeURIComponent(currentWinner.name)}`;
 
-      // 5. Aggregate Ratings and Reviews
       const matches = allReviews.filter(r => {
         const rName = getProp(r, ['restaurant', 'name', 'place']);
         return rName.trim().toLowerCase() === currentWinner.name.trim().toLowerCase();
@@ -726,9 +805,7 @@
 
     function closeModalAndSpinAgain() {
       closeModal();
-      setTimeout(() => {
-        spinWheel();
-      }, 300);
+      setTimeout(() => { spinWheel(); }, 300);
     }
 
     init();
