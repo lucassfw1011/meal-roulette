@@ -599,7 +599,7 @@
     const GIFS_TAB_GID = '579711071';
     const RESTAURANTS_TAB_GID = '0'; // Replace with actual GID if different
     const REVIEWS_TAB_GID = '0';     // Replace with actual GID if different
-    const PIXEL_ASSETS_TAB_GID = 'YOUR_PIXEL_ASSETS_TAB_GID_HERE'; 
+    const PIXEL_ASSETS_TAB_GID = '642604358'; 
 
     const GIFS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GIFS_TAB_GID}`;
     const RESTAURANTS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${RESTAURANTS_TAB_GID}`;
@@ -746,69 +746,70 @@
     }
 
     async function loadPixelAssets() {
-  if (!PIXEL_ASSETS_TAB_GID || PIXEL_ASSETS_TAB_GID === 'YOUR_PIXEL_ASSETS_TAB_GID_HERE') return;
+      if (!PIXEL_ASSETS_TAB_GID || PIXEL_ASSETS_TAB_GID === 'YOUR_PIXEL_ASSETS_TAB_GID_HERE') return;
 
-  try {
-    const res = await fetch(PIXEL_ASSETS_CSV_URL);
-    const text = await res.text();
-    const lines = text.split(/\r?\n/).filter(l => l.trim());
-    if (lines.length <= 1) return;
+      try {
+        const res = await fetch(PIXEL_ASSETS_CSV_URL);
+        const text = await res.text();
+        const lines = text.split(/\r?\n/).filter(l => l.trim());
+        if (lines.length <= 1) return;
 
-    const leftBox = document.getElementById('pixelSidebarLeft');
-    const rightBox = document.getElementById('pixelSidebarRight');
-    const topBox = document.getElementById('pixelTop');
-    const bottomBox = document.getElementById('pixelBottom');
-    const bgBox = document.getElementById('pixelBg');
+        const leftBox = document.getElementById('pixelSidebarLeft');
+        const rightBox = document.getElementById('pixelSidebarRight');
+        const topBox = document.getElementById('pixelTop');
+        const bottomBox = document.getElementById('pixelBottom');
+        const bgBox = document.getElementById('pixelBg');
 
-    if (leftBox) leftBox.innerHTML = '';
-    if (rightBox) rightBox.innerHTML = '';
-    if (topBox) topBox.innerHTML = '';
-    if (bottomBox) bottomBox.innerHTML = '';
+        if (leftBox) leftBox.innerHTML = '';
+        if (rightBox) rightBox.innerHTML = '';
+        if (topBox) topBox.innerHTML = '';
+        if (bottomBox) bottomBox.innerHTML = '';
 
-    lines.slice(1).forEach(line => {
-      const c = parseCSVLine(line);
-      const url = c[0] ? c[0].replace(/["'\r\n]/g, '').trim() : '';
-      const side = (c[1] || 'left').toLowerCase().trim();
-      const animation = (c[2] || 'float').toLowerCase().trim();
-      const size = c[3] || '180';
-      const speed = c[4] || '20';
+        lines.slice(1).forEach(line => {
+          const c = parseCSVLine(line);
+          const url = c[0] ? c[0].replace(/["'\r\n]/g, '').trim() : '';
+          const side = (c[1] || 'left').toLowerCase().trim();
+          const animation = (c[2] || 'float').toLowerCase().trim();
+          const size = c[3] || '180';
+          const speed = c[4] || '20';
 
-      if (!url || !url.startsWith('http')) return;
+          if (!url || !url.startsWith('http')) return;
 
-      // Handle Full Background Layer
-      if (side.includes('bg') || side.includes('background')) {
-        if (bgBox) {
-          bgBox.style.backgroundImage = `url('${url}')`;
-          if (side.includes('repeat') || side.includes('tile')) {
-            bgBox.className = 'pixel-bg-layer bg-repeat';
-          } else {
-            bgBox.className = 'pixel-bg-layer bg-cover';
+          // Handle Full Background Layer
+          if (side.includes('bg') || side.includes('background')) {
+            if (bgBox) {
+              bgBox.style.backgroundImage = `url('${url}')`;
+              if (side.includes('repeat') || side.includes('tile')) {
+                bgBox.className = 'pixel-bg-layer bg-repeat';
+              } else {
+                bgBox.className = 'pixel-bg-layer bg-cover';
+              }
+            }
+            return;
           }
-        }
-        return;
-      }
 
-      // Handle Side Animated GIF Assets
-      const img = document.createElement('img');
-      img.src = url;
-      img.className = `pixel-asset anim-${animation}`;
-      img.style.width = `${size}px`;
-      img.style.animationDuration = `${speed}s`;
+          // Handle Side Animated GIF Assets
+          const img = document.createElement('img');
+          img.src = url;
+          img.className = `pixel-asset anim-${animation}`;
+          img.style.width = `${size}px`;
+          img.style.animationDuration = `${speed}s`;
 
-      if (side.includes('right')) {
-        if (rightBox) rightBox.appendChild(img);
-      } else if (side.includes('top')) {
-        if (topBox) topBox.appendChild(img);
-      } else if (side.includes('bottom')) {
-        if (bottomBox) bottomBox.appendChild(img);
-      } else {
-        if (leftBox) leftBox.appendChild(img);
+          if (side.includes('right')) {
+            if (rightBox) rightBox.appendChild(img);
+          } else if (side.includes('top')) {
+            if (topBox) topBox.appendChild(img);
+          } else if (side.includes('bottom')) {
+            if (bottomBox) bottomBox.appendChild(img);
+          } else {
+            if (leftBox) leftBox.appendChild(img);
+          }
+        });
+      } catch (e) {
+        console.error("Error loading pixel assets:", e);
       }
-    });
-  } catch (e) {
-    console.error("Error loading pixel assets:", e);
-  }
-}
+    }
+
     function populateFilterOptions() {
       const categories = [...new Set(allRestaurants.map(r => r.category).filter(Boolean))].sort();
       const prices = [...new Set(allRestaurants.map(r => r.price).filter(Boolean))].sort();
