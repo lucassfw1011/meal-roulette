@@ -9,6 +9,40 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
+    /* Container for top round buttons */
+.top-round-nav {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* Round Action Buttons */
+.round-nav-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #151d30;
+  border: 1px solid #233148;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+/* Hover Effect */
+.round-nav-btn:hover {
+  background: #ff9900;
+  border-color: #ff9900;
+  color: #000000;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 153, 0, 0.4);
+}
     /* --- GIF MODAL POPUP STYLES --- */
     .gif-modal-overlay {
       position: fixed;
@@ -491,9 +525,9 @@
   <div id="pixelSidebarLeft" class="pixel-sidebar left"></div>
   <div id="pixelSidebarRight" class="pixel-sidebar right"></div>
 
-  <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap;">
-  <a href="review.html" class="top-link-btn">✍️ Write a Review / Search Restaurants</a>
-  <a href="submit.html" class="top-link-btn">➕ Suggest a New Spot</a>
+  <div class="top-round-nav">
+  <a href="review.html" class="round-nav-btn" title="Review / Search">✍️</a>
+  <a href="submit.html" class="round-nav-btn" title="Spot">➕</a>
 </div>
 
     <div class="filters-card">
