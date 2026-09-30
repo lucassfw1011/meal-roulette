@@ -9,12 +9,24 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
-    /* Container for top round buttons */
-.top-round-nav {
+    
+    /* Layout wrapper to align side menu next to main card */
+.app-layout-wrapper {
   display: flex;
+  align-items: flex-start;
   justify-content: center;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 12px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Vertical Sidebar on the Left */
+.side-action-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 8px;
 }
 
 /* Round Action Buttons */
@@ -525,38 +537,42 @@
   <div id="pixelSidebarLeft" class="pixel-sidebar left"></div>
   <div id="pixelSidebarRight" class="pixel-sidebar right"></div>
 
-  <div class="top-round-nav">
-  <a href="review.html" class="round-nav-btn" title="Review / Search">✍️</a>
-  <a href="submit.html" class="round-nav-btn" title="Spot">➕</a>
-</div>
+  <div class="app-layout-wrapper">
+  
+  <!-- Left Vertical Action Sidebar -->
+  <div class="side-action-nav">
+    <a href="review.html" class="round-nav-btn" title="Write a Review / Search">✍️</a>
+    <a href="submit.html" class="round-nav-btn" title="Suggest a New Spot">➕</a>
+  </div>
 
-    <div class="filters-card">
-      <div class="filter-grid">
-        <div class="filter-group">
-          <label>Category:</label>
-          <select id="filterCategory" onchange="applyFilters()">
-            <option value="ALL">All</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label>Price:</label>
-          <select id="filterPrice" onchange="applyFilters()">
-            <option value="ALL">All</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label>Location:</label>
-          <select id="filterLocation" onchange="applyFilters()">
-            <option value="ALL">All</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label>Off Day:</label>
-          <select id="filterOffDay" onchange="applyFilters()">
-            <option value="ALL">All</option>
-          </select>
-        </div>
+  <!-- Filters Card -->
+  <div class="filters-card">
+    <div class="filter-grid">
+      <div class="filter-group">
+        <label>Category:</label>
+        <select id="filterCategory" onchange="applyFilters()">
+          <option value="ALL">All</option>
+        </select>
       </div>
+      <div class="filter-group">
+        <label>Price:</label>
+        <select id="filterPrice" onchange="applyFilters()">
+          <option value="ALL">All</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Location:</label>
+        <select id="filterLocation" onchange="applyFilters()">
+          <option value="ALL">All</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Off Day:</label>
+        <select id="filterOffDay" onchange="applyFilters()">
+          <option value="ALL">All</option>
+        </select>
+      </div>
+    </div>
       <div class="meal-pills-container">
         <div class="meal-row">
           <button class="meal-pill active" onclick="selectMealSession('AllDay', this)">All Day</button>
